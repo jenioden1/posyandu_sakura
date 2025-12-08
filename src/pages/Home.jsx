@@ -76,9 +76,30 @@ function Home() {
   const stats = {
     total_balita: balitaList.length,
     total_pemeriksaan: pemeriksaanList.length,
-    normal: pemeriksaanList.filter(p => p.status_gizi_hasil_compute === 'Normal').length,
-    stunting: pemeriksaanList.filter(p => p.status_gizi_hasil_compute?.includes('Stunting')).length,
-    wasting: pemeriksaanList.filter(p => p.status_gizi_hasil_compute?.includes('Wasting') || p.status_gizi_hasil_compute === 'Gizi Kurang').length
+    normal: pemeriksaanList.filter(p => 
+      p.status_gizi === 'Normal' || 
+      p.status_gizi_hasil_compute?.includes('Normal') ||
+      p.kategori_tb_u === 'NORMAL' || 
+      p.kategori_bb_u === 'NORMAL'
+    ).length,
+    stunting: pemeriksaanList.filter(p => 
+      p.status_gizi?.includes('Stunting') ||
+      p.status_gizi_hasil_compute?.includes('Stunting') ||
+      p.status_gizi_hasil_compute?.includes('Pendek') ||
+      p.kategori_tb_u === 'STUNTING' ||
+      p.kategori_tb_u === 'SEVERE_STUNTING'
+    ).length,
+    wasting: pemeriksaanList.filter(p => 
+      p.status_gizi?.includes('Gizi Kurang') ||
+      p.status_gizi?.includes('Gizi Buruk') ||
+      p.status_gizi_hasil_compute?.includes('Wasting') || 
+      p.status_gizi_hasil_compute?.includes('Gizi Kurang') ||
+      p.status_gizi_hasil_compute?.includes('Gizi Buruk') ||
+      p.kategori_bb_u === 'WASTING' ||
+      p.kategori_bb_u === 'SEVERE_WASTING' ||
+      p.kategori_bb_u === 'UNDERWEIGHT' ||
+      p.kategori_bb_u === 'SEVERE_UNDERWEIGHT'
+    ).length
   }
 
   // Format tanggal

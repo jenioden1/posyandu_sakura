@@ -62,33 +62,70 @@ function Statistik() {
     const total_pemeriksaan = pemeriksaanList.length
 
     // Calculate status gizi distribution
-    const normal = pemeriksaanList.filter(p => 
-      p.status_gizi_hasil_compute?.includes('Normal') || 
-      p.kategori_tb_u === 'NORMAL' || 
-      p.kategori_bb_u === 'NORMAL'
-    ).length
+    // Menggunakan field yang konsisten: status_gizi, status_gizi_tb_u, status_gizi_bb_u, kategori_tb_u, kategori_bb_u
+    const normal = pemeriksaanList.filter(p => {
+      const status = (p.status_gizi || '').toLowerCase()
+      const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
+      const statusTBU = (p.status_gizi_tb_u || '').toLowerCase()
+      const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
+      
+      return status === 'normal' ||
+        statusCompute.includes('normal') ||
+        statusTBU === 'normal' ||
+        statusBBU === 'normal' ||
+        p.kategori_tb_u === 'NORMAL' || 
+        p.kategori_bb_u === 'NORMAL'
+    }).length
 
-    const stunting = pemeriksaanList.filter(p => 
-      p.status_gizi_hasil_compute?.includes('STUNTING') || 
-      p.status_gizi_hasil_compute?.includes('Pendek') ||
-      p.kategori_tb_u === 'STUNTING'
-    ).length
+    const stunting = pemeriksaanList.filter(p => {
+      const status = (p.status_gizi || '').toLowerCase()
+      const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
+      const statusTBU = (p.status_gizi_tb_u || '').toLowerCase()
+      
+      return status.includes('stunting') ||
+        statusCompute.includes('stunting') || 
+        statusCompute.includes('pendek') ||
+        statusTBU.includes('stunting') ||
+        statusTBU.includes('pendek') ||
+        p.kategori_tb_u === 'STUNTING' ||
+        p.kategori_tb_u === 'SEVERE_STUNTING'
+    }).length
 
-    const wasting = pemeriksaanList.filter(p => 
-      p.status_gizi_hasil_compute?.includes('WASTING') || 
-      p.status_gizi_hasil_compute?.includes('Gizi Kurang') ||
-      p.status_gizi_hasil_compute?.includes('Gizi Buruk') ||
-      p.kategori_bb_u === 'WASTING' ||
-      p.kategori_bb_u === 'SEVERE_WASTING'
-    ).length
+    const wasting = pemeriksaanList.filter(p => {
+      const status = (p.status_gizi || '').toLowerCase()
+      const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
+      const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
+      
+      return status.includes('gizi kurang') ||
+        status.includes('gizi buruk') ||
+        statusCompute.includes('wasting') || 
+        statusCompute.includes('gizi kurang') ||
+        statusCompute.includes('gizi buruk') ||
+        statusBBU.includes('gizi kurang') ||
+        statusBBU.includes('gizi buruk') ||
+        p.kategori_bb_u === 'WASTING' ||
+        p.kategori_bb_u === 'SEVERE_WASTING' ||
+        p.kategori_bb_u === 'UNDERWEIGHT' ||
+        p.kategori_bb_u === 'SEVERE_UNDERWEIGHT'
+    }).length
 
-    const overweight = pemeriksaanList.filter(p => 
-      p.status_gizi_hasil_compute?.includes('OVERWEIGHT') || 
-      p.status_gizi_hasil_compute?.includes('Obesitas') ||
-      p.status_gizi_hasil_compute?.includes('Gizi Lebih') ||
-      p.kategori_bb_u === 'OVERWEIGHT' ||
-      p.kategori_bb_u === 'OBESITAS'
-    ).length
+    const overweight = pemeriksaanList.filter(p => {
+      const status = (p.status_gizi || '').toLowerCase()
+      const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
+      const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
+      
+      return status.includes('obesitas') ||
+        status.includes('gizi lebih') ||
+        statusCompute.includes('overweight') || 
+        statusCompute.includes('obesitas') ||
+        statusCompute.includes('gizi lebih') ||
+        statusBBU.includes('obesitas') ||
+        statusBBU.includes('gizi lebih') ||
+        p.kategori_bb_u === 'OVERWEIGHT' ||
+        p.kategori_bb_u === 'OBESITAS' ||
+        p.kategori_bb_u === 'AT_RISK_OVERWEIGHT' ||
+        p.kategori_bb_u === 'OBESE'
+    }).length
 
     setStats({
       total_balita,

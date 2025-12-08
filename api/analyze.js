@@ -253,6 +253,7 @@ export default async function handler(req, res) {
       status_gizi_tb_u: whoResult.status_gizi_tb_u,
       status_gizi_bb_u: whoResult.status_gizi_bb_u,
       status_gizi: whoResult.status_gizi_utama, // Status utama untuk kompatibilitas
+      status_gizi_hasil_compute: `${whoResult.status_gizi_tb_u} (TB/U), ${whoResult.status_gizi_bb_u} (BB/U)`, // Gabungan untuk statistik
       kategori_tb_u: whoResult.kategori_tb_u,
       kategori_bb_u: whoResult.kategori_bb_u,
       catatan_perhitungan: whoResult.note,
