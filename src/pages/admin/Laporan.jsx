@@ -66,25 +66,44 @@ function AdminLaporan() {
   const parseDate = (dateValue) => {
     if (!dateValue) return null
     
-    // Jika Firestore Timestamp
-    if (dateValue.toDate && typeof dateValue.toDate === 'function') {
-      return dateValue.toDate()
-    }
-    
-    // Jika string ISO atau format lain
-    if (typeof dateValue === 'string') {
-      const parsed = new Date(dateValue)
-      if (!isNaN(parsed.getTime())) {
-        return parsed
+    try {
+      // Jika Firestore Timestamp
+      if (dateValue.toDate && typeof dateValue.toDate === 'function') {
+        return dateValue.toDate()
       }
-    }
-    
-    // Jika sudah Date object
-    if (dateValue instanceof Date) {
-      return dateValue
+      
+      // Jika string ISO atau format lain (YYYY-MM-DD atau ISO string)
+      if (typeof dateValue === 'string') {
+        // Handle format YYYY-MM-DD (dari input date)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+          const parsed = new Date(dateValue + 'T00:00:00')
+          if (!isNaN(parsed.getTime())) {
+            return parsed
+          }
+        }
+        // Handle ISO string atau format lain
+        const parsed = new Date(dateValue)
+        if (!isNaN(parsed.getTime())) {
+          return parsed
+        }
+      }
+      
+      // Jika sudah Date object
+      if (dateValue instanceof Date) {
+        if (!isNaN(dateValue.getTime())) {
+          return dateValue
+        }
+      }
+    } catch (e) {
+      console.warn('Error parsing date:', dateValue, e)
     }
     
     return null
+  }
+
+  // Helper untuk mendapatkan tanggal pemeriksaan (prioritas: tgl_ukur > created_at)
+  const getPemeriksaanDate = (p) => {
+    return parseDate(p.tgl_ukur) || parseDate(p.created_at)
   }
 
   // Filter data berdasarkan tanggal
@@ -92,27 +111,45 @@ function AdminLaporan() {
     let filteredPemeriksaan = [...pemeriksaanList]
     let filteredBalita = [...balitaList]
 
-    if (filterDate.start) {
-      const startDate = new Date(filterDate.start)
-      startDate.setHours(0, 0, 0, 0)
-      
+    // Jika ada filter tanggal, terapkan filter
+    if (filterDate.start || filterDate.end) {
       filteredPemeriksaan = filteredPemeriksaan.filter(p => {
-        // Coba parse dari tgl_ukur dulu, lalu created_at
-        const tgl = parseDate(p.tgl_ukur) || parseDate(p.created_at)
-        if (!tgl) return false
-        return tgl >= startDate
-      })
-    }
-
-    if (filterDate.end) {
-      const endDate = new Date(filterDate.end)
-      endDate.setHours(23, 59, 59, 999)
-      
-      filteredPemeriksaan = filteredPemeriksaan.filter(p => {
-        // Coba parse dari tgl_ukur dulu, lalu created_at
-        const tgl = parseDate(p.tgl_ukur) || parseDate(p.created_at)
-        if (!tgl) return false
-        return tgl <= endDate
+        const tgl = getPemeriksaanDate(p)
+        
+        // Jika tidak ada tanggal yang bisa di-parse, exclude data ini
+        if (!tgl) {
+          return false
+        }
+        
+        // Normalize tanggal ke waktu 00:00:00 untuk perbandingan yang akurat
+        const tglNormalized = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate())
+        
+        // Filter start date (jika diisi)
+        if (filterDate.start) {
+          const startDate = new Date(filterDate.start)
+          startDate.setHours(0, 0, 0, 0)
+          const startNormalized = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+          
+          // Jika tanggal pemeriksaan lebih kecil dari start date, exclude
+          if (tglNormalized < startNormalized) {
+            return false
+          }
+        }
+        
+        // Filter end date (jika diisi)
+        if (filterDate.end) {
+          const endDate = new Date(filterDate.end)
+          endDate.setHours(23, 59, 59, 999)
+          const endNormalized = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
+          
+          // Jika tanggal pemeriksaan lebih besar dari end date, exclude
+          if (tglNormalized > endNormalized) {
+            return false
+          }
+        }
+        
+        // Jika semua kondisi terpenuhi, include data ini
+        return true
       })
     }
 
@@ -318,7 +355,14 @@ function AdminLaporan() {
       {/* Filter */}
       <div className="card bg-white shadow-md border border-gray-200 mb-6">
         <div className="card-body">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Laporan</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Filter Laporan</h2>
+            {(filterDate.start || filterDate.end) && (
+              <span className="badge badge-info badge-sm">
+                Filter Aktif
+              </span>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -329,7 +373,13 @@ function AdminLaporan() {
                 value={filterDate.start}
                 onChange={(e) => setFilterDate({ ...filterDate, start: e.target.value })}
                 className="input input-bordered w-full"
+                max={filterDate.end || undefined}
               />
+              {filterDate.start && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Menampilkan data dari: {formatTanggal(filterDate.start)}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -340,17 +390,40 @@ function AdminLaporan() {
                 value={filterDate.end}
                 onChange={(e) => setFilterDate({ ...filterDate, end: e.target.value })}
                 className="input input-bordered w-full"
+                min={filterDate.start || undefined}
               />
+              {filterDate.end && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Sampai dengan: {formatTanggal(filterDate.end)}
+                </p>
+              )}
             </div>
             <div className="flex items-end">
               <button
                 onClick={() => setFilterDate({ start: '', end: '' })}
                 className="btn btn-outline w-full"
+                disabled={!filterDate.start && !filterDate.end}
               >
                 Reset Filter
               </button>
             </div>
           </div>
+          {(filterDate.start || filterDate.end) && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-700">
+                <strong>Info Filter:</strong> Menampilkan {filteredPemeriksaan.length} dari {pemeriksaanList.length} pemeriksaan
+                {filterDate.start && filterDate.end && (
+                  <span> dalam rentang {formatTanggal(filterDate.start)} - {formatTanggal(filterDate.end)}</span>
+                )}
+                {filterDate.start && !filterDate.end && (
+                  <span> mulai dari {formatTanggal(filterDate.start)}</span>
+                )}
+                {!filterDate.start && filterDate.end && (
+                  <span> sampai dengan {formatTanggal(filterDate.end)}</span>
+                )}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

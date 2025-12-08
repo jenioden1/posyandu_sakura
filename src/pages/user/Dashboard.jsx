@@ -40,6 +40,41 @@ function UserDashboard() {
     }
   }, [user])
 
+  // Helper function untuk mendapatkan status badge yang konsisten dengan standar WHO
+  const getStatusBadge = (status) => {
+    if (!status || status === '-' || status === 'PENDING') {
+      return <span className="badge badge-warning badge-sm">PENDING</span>
+    }
+    
+    const statusLower = (status || '').toLowerCase()
+    const statusText = status || '-'
+    
+    // Stunting atau Gizi Buruk (merah)
+    if (statusLower.includes('stunting') || statusLower.includes('buruk') || statusLower.includes('severe')) {
+      return <span className="badge badge-error badge-sm">{statusText}</span>
+    }
+    // Gizi Kurang atau Wasting (kuning)
+    else if (statusLower.includes('kurang') || statusLower.includes('wasting') || statusLower.includes('underweight')) {
+      return <span className="badge badge-warning badge-sm">{statusText}</span>
+    }
+    // Normal atau Gizi Baik (hijau)
+    else if (statusLower.includes('normal') || statusLower.includes('baik')) {
+      return <span className="badge badge-success badge-sm">{statusText}</span>
+    }
+    // Overweight atau Obesitas (orange)
+    else if (statusLower.includes('lebih') || statusLower.includes('obesitas') || statusLower.includes('overweight') || statusLower.includes('obese')) {
+      return <span className="badge badge-warning badge-sm">{statusText}</span>
+    }
+    // Tinggi (biru)
+    else if (statusLower.includes('tinggi') || statusLower.includes('tall')) {
+      return <span className="badge badge-info badge-sm">{statusText}</span>
+    }
+    // Default (abu-abu)
+    else {
+      return <span className="badge badge-ghost badge-sm">{statusText}</span>
+    }
+  }
+
   const loadData = async () => {
     try {
       setLoading(true)
@@ -386,16 +421,10 @@ function UserDashboard() {
                     )}
                   </div>
                 </div>
-                {pemeriksaan.length > 0 && pemeriksaan[0].status_gizi && (
+                {pemeriksaan.length > 0 && (pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi) && (
                   <div className="mt-2 pt-2 border-t">
                     <span className="text-gray-600 text-sm">Status Gizi: </span>
-                    <span className={`text-sm font-medium px-2 py-1 rounded ${
-                      pemeriksaan[0].status_gizi === 'Gizi Baik' ? 'bg-green-100 text-green-800' :
-                      pemeriksaan[0].status_gizi === 'Gizi Kurang' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-orange-100 text-orange-800'
-                    }`}>
-                      {pemeriksaan[0].status_gizi}
-                    </span>
+                    {getStatusBadge(pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi)}
                   </div>
                 )}
               </div>
@@ -428,13 +457,8 @@ function UserDashboard() {
                       </div>
                       <div>
                         <div className="text-gray-600">Status Gizi Terakhir</div>
-                        <div className={`font-medium text-xs px-2 py-1 rounded inline-block ${
-                          pemeriksaan[0].status_gizi === 'Gizi Baik' ? 'bg-green-100 text-green-800' :
-                          pemeriksaan[0].status_gizi === 'Gizi Kurang' ? 'bg-yellow-100 text-yellow-800' :
-                          pemeriksaan[0].status_gizi === 'Risiko Kelebihan' ? 'bg-orange-100 text-orange-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {pemeriksaan[0].status_gizi || '-'}
+                        <div className="inline-block">
+                          {getStatusBadge(pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi || '-')}
                         </div>
                       </div>
                     </>
@@ -558,14 +582,7 @@ function UserDashboard() {
                            p.lk ? `${p.lk} cm` : '-'}
                         </td>
                         <td className="px-4 py-2 text-sm">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            p.status_gizi === 'Gizi Baik' ? 'bg-green-100 text-green-800' :
-                            p.status_gizi === 'Gizi Kurang' ? 'bg-yellow-100 text-yellow-800' :
-                            p.status_gizi === 'Risiko Kelebihan' ? 'bg-orange-100 text-orange-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {p.status_gizi || '-'}
-                          </span>
+                          {getStatusBadge(p.status_gizi_hasil_compute || p.status_gizi || '-')}
                         </td>
                       </tr>
                     ))

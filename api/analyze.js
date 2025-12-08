@@ -162,13 +162,15 @@ function computeStatusGiziWHO({ berat, tinggi, umur_bulan, jenis_kelamin }) {
   const z_score_bb_u = calculateZScore(berat, refBB_U.median, refBB_U.sd);
   const statusBB_U = classifyStatusGizi(z_score_bb_u, 'BB_U');
 
-  // 4. Tentukan status gizi utama (prioritas: Stunting > Underweight)
+  // 4. Tentukan status gizi utama (prioritas: Stunting > Underweight > Overweight > Normal)
   let status_gizi_utama = 'Normal';
   if (statusTB_U.kategori === 'SEVERE_STUNTING' || statusTB_U.kategori === 'STUNTING') {
     status_gizi_utama = statusTB_U.status;
   } else if (statusBB_U.kategori === 'SEVERE_UNDERWEIGHT') {
     status_gizi_utama = statusBB_U.status;
   } else if (statusBB_U.kategori === 'UNDERWEIGHT') {
+    status_gizi_utama = statusBB_U.status;
+  } else if (statusBB_U.kategori === 'OBESE' || statusBB_U.kategori === 'AT_RISK_OVERWEIGHT') {
     status_gizi_utama = statusBB_U.status;
   } else if (statusTB_U.kategori === 'NORMAL' && statusBB_U.kategori === 'NORMAL') {
     status_gizi_utama = 'Normal';

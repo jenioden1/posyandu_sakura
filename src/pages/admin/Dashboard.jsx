@@ -109,13 +109,12 @@ function AdminDashboard() {
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tgl Lahir</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">BB (kg)</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">TB (cm)</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {recentBalita.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                     Belum ada data balita
                   </td>
                 </tr>
@@ -127,14 +126,6 @@ function AdminDashboard() {
                     <td className="px-4 py-2 text-sm">{formatTanggal(b.tgl_lahir)}</td>
                     <td className="px-4 py-2 text-sm">{b.bb || '-'}</td>
                     <td className="px-4 py-2 text-sm">{b.tb || '-'}</td>
-                    <td className="px-4 py-2 text-sm">
-                      <button
-                        onClick={() => window.location.href = `/admin/balita?edit=${b.id}`}
-                        className="text-blue-600 hover:underline text-sm"
-                      >
-                        Edit
-                      </button>
-                    </td>
                   </tr>
                 ))
               )}
