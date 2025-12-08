@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import { Link } from 'react-router-dom'
+import StatusBadge from '../components/common/StatusBadge'
 
 function Home() {
   const [balitaList, setBalitaList] = useState([])
@@ -119,37 +120,6 @@ function Home() {
     })
   }
 
-  // Get status badge - Standar WHO: Stunting, Gizi Buruk, Gizi Kurang, Normal, Overweight, Obesitas, Tinggi
-  const getStatusBadge = (status) => {
-    if (!status) return <span className="badge badge-warning">PENDING</span>
-    
-    const statusLower = status.toLowerCase()
-    
-    // Stunting atau Gizi Buruk (merah)
-    if (statusLower.includes('stunting') || statusLower.includes('buruk')) {
-      return <span className="badge badge-error">{status}</span>
-    }
-    // Gizi Kurang atau Wasting (kuning)
-    else if (statusLower.includes('kurang') || statusLower.includes('wasting') || statusLower.includes('underweight')) {
-      return <span className="badge badge-warning">{status}</span>
-    }
-    // Normal (hijau) - hanya "normal", tidak ada "baik" atau "sehat"
-    else if (statusLower.includes('normal')) {
-      return <span className="badge badge-success">{status}</span>
-    }
-    // Overweight atau Obesitas (kuning)
-    else if (statusLower.includes('overweight') || statusLower.includes('obesitas') || statusLower.includes('obese')) {
-      return <span className="badge badge-warning">{status}</span>
-    }
-    // Tinggi (biru)
-    else if (statusLower.includes('tinggi') || statusLower.includes('tall')) {
-      return <span className="badge badge-info">{status}</span>
-    }
-    // Default (abu-abu)
-    else {
-      return <span className="badge badge-ghost">{status}</span>
-    }
-  }
 
   if (loading) {
     return (
@@ -317,7 +287,12 @@ function Home() {
                          pemeriksaan.tb ? `${pemeriksaan.tb.toFixed(1)} cm` : 
                          pemeriksaan.tinggi_badan ? `${pemeriksaan.tinggi_badan.toFixed(1)} cm` : '-'}
                       </td>
-                      <td>{getStatusBadge(pemeriksaan.status_gizi_hasil_compute || pemeriksaan.status_gizi)}</td>
+                      <td>
+                        <StatusBadge 
+                          status={pemeriksaan.status_gizi_hasil_compute || pemeriksaan.status_gizi} 
+                          size="md"
+                        />
+                      </td>
                       <td>{formatDate(pemeriksaan.tgl_ukur)}</td>
                     </tr>
                   )

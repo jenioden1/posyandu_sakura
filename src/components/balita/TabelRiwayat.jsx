@@ -7,8 +7,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import StatusBadge from '../common/StatusBadge';
 
 function TabelRiwayat() {
   const [pemeriksaanList, setPemeriksaanList] = useState([]);
@@ -19,7 +20,8 @@ function TabelRiwayat() {
 
   // Realtime listener untuk data balita (untuk mapping nama)
   useEffect(() => {
-    const q = query(collection(db, 'balita'), orderBy('nama_anak', 'asc'));
+    // Hapus orderBy untuk menghindari index requirement, sort manual di JavaScript
+    const q = query(collection(db, 'balita'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const map = {};
@@ -32,7 +34,7 @@ function TabelRiwayat() {
       setBalitaMap(map);
     }, (err) => {
       console.error('Error fetching balita:', err);
-      setError('Gagal memuat data balita');
+      setError('Gagal memuat data balita. Periksa koneksi internet Anda.');
     });
 
     return () => unsubscribe();
@@ -42,64 +44,69 @@ function TabelRiwayat() {
   useEffect(() => {
     let q;
     
+    // Hapus orderBy untuk menghindari composite index requirement
+    // Sort manual di JavaScript setelah data diterima
     if (filterBalita) {
       // Filter by balita_id
       q = query(
         collection(db, 'pemeriksaan'),
-        where('balita_id', '==', filterBalita),
-        orderBy('tgl_ukur', 'desc')
+        where('balita_id', '==', filterBalita)
       );
     } else {
       // All pemeriksaan
-      q = query(
-        collection(db, 'pemeriksaan'),
-        orderBy('tgl_ukur', 'desc')
-      );
+      q = query(collection(db, 'pemeriksaan'));
     }
 
     setLoading(true);
+    setError(''); // Clear error saat memuat ulang
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc, index) => ({
-        id: doc.id,
-        no: index + 1,
-        ...doc.data()
+      let data = snapshot.docs.map((doc) => {
+        const docData = doc.data();
+        // Normalize tgl_ukur untuk sorting
+        const tgl_ukur_date = docData.tgl_ukur 
+          ? (docData.tgl_ukur.toDate ? docData.tgl_ukur.toDate() : new Date(docData.tgl_ukur))
+          : (docData.created_at?.toDate ? docData.created_at.toDate() : new Date(0));
+        
+        return {
+          id: doc.id,
+          ...docData,
+          tgl_ukur_date
+        };
+      });
+      
+      // Sort manual by tgl_ukur (terbaru dulu)
+      data.sort((a, b) => {
+        return b.tgl_ukur_date - a.tgl_ukur_date;
+      });
+      
+      // Tambahkan nomor urut setelah sorting
+      data = data.map((item, index) => ({
+        ...item,
+        no: index + 1
       }));
       
       setPemeriksaanList(data);
       setLoading(false);
     }, (err) => {
       console.error('Error fetching pemeriksaan:', err);
-      setError('Gagal memuat data pemeriksaan');
+      let errorMessage = 'Gagal memuat data pemeriksaan.';
+      
+      if (err.code === 'permission-denied') {
+        errorMessage = 'Akses ditolak. Periksa koneksi internet atau hubungi administrator.';
+      } else if (err.code === 'unavailable') {
+        errorMessage = 'Layanan database tidak tersedia. Periksa koneksi internet Anda.';
+      } else if (err.message) {
+        errorMessage = `Gagal memuat data: ${err.message}`;
+      }
+      
+      setError(errorMessage);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, [filterBalita]);
 
-  // Get status gizi badge color
-  const getStatusBadge = (status) => {
-    if (!status || status === 'PENDING') {
-      return <span className="badge badge-warning badge-lg">PENDING</span>;
-    }
-    
-    const statusLower = status.toLowerCase();
-    
-    // Standar WHO: Stunting, Gizi Buruk, Gizi Kurang, Normal, Overweight, Obesitas, Tinggi
-    if (statusLower.includes('stunting') || statusLower.includes('buruk')) {
-      return <span className="badge badge-error badge-lg">{status}</span>;
-    } else if (statusLower.includes('kurang') || statusLower.includes('wasting') || statusLower.includes('underweight')) {
-      return <span className="badge badge-warning badge-lg">{status}</span>;
-    } else if (statusLower.includes('normal')) {
-      return <span className="badge badge-success badge-lg">{status}</span>;
-    } else if (statusLower.includes('overweight') || statusLower.includes('obesitas') || statusLower.includes('obese')) {
-      return <span className="badge badge-warning badge-lg">{status}</span>;
-    } else if (statusLower.includes('tinggi') || statusLower.includes('tall')) {
-      return <span className="badge badge-info badge-lg">{status}</span>;
-    } else {
-      return <span className="badge badge-ghost badge-lg">{status}</span>;
-    }
-  };
 
   // Format tanggal
   const formatDate = (date) => {
@@ -156,23 +163,28 @@ function TabelRiwayat() {
           
           {/* Filter by Balita */}
           <div className="form-control w-full md:w-auto">
+            <label className="label pb-1">
+              <span className="label-text text-sm font-medium text-gray-700">Filter Balita</span>
+            </label>
             <select
               value={filterBalita}
               onChange={(e) => setFilterBalita(e.target.value)}
-              className="select select-bordered select-sm"
+              className="select select-bordered select-sm transition-all duration-200"
             >
               <option value="">Semua Balita</option>
-              {Object.values(balitaMap).map((balita) => (
-                <option key={balita.id} value={balita.id}>
-                  {balita.nama_anak}
-                </option>
-              ))}
+              {Object.values(balitaMap)
+                .sort((a, b) => (a.nama_anak || '').localeCompare(b.nama_anak || ''))
+                .map((balita) => (
+                  <option key={balita.id} value={balita.id}>
+                    {balita.nama_anak}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
 
         {error && (
-          <div className="alert alert-error mb-4">
+          <div className="alert alert-error mb-4 animate-fade-in">
             <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -181,7 +193,7 @@ function TabelRiwayat() {
         )}
 
         <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
+          <table className="table table-zebra w-full animate-fade-in">
             <thead>
               <tr>
                 <th>No</th>
@@ -212,8 +224,8 @@ function TabelRiwayat() {
                 pemeriksaanList.map((item) => {
                   const balita = balitaMap[item.balita_id];
                   return (
-                    <tr key={item.id}>
-                      <td>{item.no}</td>
+                    <tr key={item.id} className="animate-fade-in">
+                      <td className="font-medium">{item.no}</td>
                       <td>
                         <div className="font-semibold">
                           {balita?.nama_anak || 'Tidak diketahui'}
@@ -249,7 +261,12 @@ function TabelRiwayat() {
                         {item.lingkar_kepala ? `${item.lingkar_kepala.toFixed(1)} cm` : 
                          item.lk ? `${item.lk.toFixed(1)} cm` : '-'}
                       </td>
-                      <td>{getStatusBadge(item.status_gizi_hasil_compute || item.status_gizi)}</td>
+                      <td>
+                        <StatusBadge 
+                          status={item.status_gizi_hasil_compute || item.status_gizi} 
+                          size="lg"
+                        />
+                      </td>
                       <td>{formatDate(item.tgl_ukur || item.created_at)}</td>
                     </tr>
                   );

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { api } from '../../utils/api'
 import { formatTanggal, calculateUmur, sortPenimbangan } from '../../utils/helpers'
+import StatusBadge from '../../components/common/StatusBadge'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -40,41 +41,6 @@ function UserDashboard() {
     }
   }, [user])
 
-  // Helper function untuk mendapatkan status badge yang konsisten dengan standar WHO
-  const getStatusBadge = (status) => {
-    if (!status || status === '-' || status === 'PENDING') {
-      return <span className="badge badge-warning badge-sm">PENDING</span>
-    }
-    
-    const statusLower = (status || '').toLowerCase()
-    const statusText = status || '-'
-    
-    // Standar WHO: Stunting, Gizi Buruk, Gizi Kurang, Normal, Overweight, Obesitas, Tinggi
-    // Stunting atau Gizi Buruk (merah)
-    if (statusLower.includes('stunting') || statusLower.includes('buruk')) {
-      return <span className="badge badge-error badge-sm">{statusText}</span>
-    }
-    // Gizi Kurang atau Wasting (kuning)
-    else if (statusLower.includes('kurang') || statusLower.includes('wasting') || statusLower.includes('underweight')) {
-      return <span className="badge badge-warning badge-sm">{statusText}</span>
-    }
-    // Normal (hijau) - hanya "normal", tidak ada "baik" atau "sehat"
-    else if (statusLower.includes('normal')) {
-      return <span className="badge badge-success badge-sm">{statusText}</span>
-    }
-    // Overweight atau Obesitas (kuning)
-    else if (statusLower.includes('overweight') || statusLower.includes('obesitas') || statusLower.includes('obese')) {
-      return <span className="badge badge-warning badge-sm">{statusText}</span>
-    }
-    // Tinggi (biru)
-    else if (statusLower.includes('tinggi') || statusLower.includes('tall')) {
-      return <span className="badge badge-info badge-sm">{statusText}</span>
-    }
-    // Default (abu-abu)
-    else {
-      return <span className="badge badge-ghost badge-sm">{statusText}</span>
-    }
-  }
 
   const loadData = async () => {
     try {
@@ -425,7 +391,10 @@ function UserDashboard() {
                 {pemeriksaan.length > 0 && (pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi) && (
                   <div className="mt-2 pt-2 border-t">
                     <span className="text-gray-600 text-sm">Status Gizi: </span>
-                    {getStatusBadge(pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi)}
+                    <StatusBadge 
+                      status={pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi} 
+                      size="sm"
+                    />
                   </div>
                 )}
               </div>
@@ -459,7 +428,10 @@ function UserDashboard() {
                       <div>
                         <div className="text-gray-600">Status Gizi Terakhir</div>
                         <div className="inline-block">
-                          {getStatusBadge(pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi || '-')}
+                          <StatusBadge 
+                            status={pemeriksaan[0].status_gizi_hasil_compute || pemeriksaan[0].status_gizi || '-'} 
+                            size="sm"
+                          />
                         </div>
                       </div>
                     </>
@@ -583,7 +555,10 @@ function UserDashboard() {
                            p.lk ? `${p.lk} cm` : '-'}
                         </td>
                         <td className="px-4 py-2 text-sm">
-                          {getStatusBadge(p.status_gizi_hasil_compute || p.status_gizi || '-')}
+                          <StatusBadge 
+                            status={p.status_gizi_hasil_compute || p.status_gizi || '-'} 
+                            size="sm"
+                          />
                         </td>
                       </tr>
                     ))
