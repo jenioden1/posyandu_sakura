@@ -59,36 +59,86 @@ function FormPemeriksaan({ onSuccess }) {
 
     try {
       // ==========================================
-      // VALIDASI DATA MENTAH
+      // VALIDASI DATA MENTAH dengan pesan yang jelas
       // ==========================================
       if (!formData.balita_id) {
-        throw new Error('Pilih nama anak terlebih dahulu');
+        throw new Error('Pilih nama anak terlebih dahulu dari dropdown di atas. Data pemeriksaan harus dikaitkan dengan balita yang terdaftar.');
       }
+      
       if (!formData.tgl_ukur) {
-        throw new Error('Tanggal pengukuran harus diisi');
+        throw new Error('Tanggal pengukuran wajib diisi. Pilih tanggal kapan pemeriksaan dilakukan.');
       }
-      if (!formData.bb || parseFloat(formData.bb) <= 0) {
-        throw new Error('Berat badan harus lebih dari 0');
+
+      // Validasi tanggal tidak boleh di masa depan
+      const tglUkur = new Date(formData.tgl_ukur);
+      const hariIni = new Date();
+      hariIni.setHours(23, 59, 59, 999); // Set ke akhir hari untuk memungkinkan input hari ini
+      if (tglUkur > hariIni) {
+        throw new Error('Tanggal pengukuran tidak boleh di masa depan. Pilih tanggal yang benar.');
       }
-      if (!formData.tb || parseFloat(formData.tb) <= 0) {
-        throw new Error('Tinggi badan harus lebih dari 0');
+
+      if (!formData.bb || formData.bb.trim() === '') {
+        throw new Error('Berat badan wajib diisi. Masukkan berat badan anak dalam kilogram (kg), contoh: 5.5');
+      }
+
+      const bbValue = parseFloat(formData.bb);
+      if (isNaN(bbValue) || bbValue <= 0) {
+        throw new Error('Berat badan harus berupa angka positif. Contoh: 5.5 (dalam kg). Pastikan tidak ada karakter selain angka dan titik.');
+      }
+
+      if (bbValue > 50) {
+        throw new Error('Berat badan terlalu besar. Pastikan satuan dalam kilogram (kg), bukan gram. Contoh: 5.5 kg, bukan 5500 gram.');
+      }
+
+      if (!formData.tb || formData.tb.trim() === '') {
+        throw new Error('Tinggi badan wajib diisi. Masukkan tinggi badan anak dalam centimeter (cm), contoh: 75');
+      }
+
+      const tbValue = parseFloat(formData.tb);
+      if (isNaN(tbValue) || tbValue <= 0) {
+        throw new Error('Tinggi badan harus berupa angka positif. Contoh: 75 (dalam cm). Pastikan tidak ada karakter selain angka.');
+      }
+
+      if (tbValue > 200) {
+        throw new Error('Tinggi badan terlalu besar. Pastikan satuan dalam centimeter (cm), bukan meter. Contoh: 75 cm, bukan 0.75 meter.');
       }
 
       // Ambil data balita lengkap untuk perhitungan WHO
       const selectedBalita = balitaList.find(b => b.id === formData.balita_id);
       if (!selectedBalita) {
-        throw new Error('Data balita tidak ditemukan');
+        throw new Error('Data balita yang dipilih tidak ditemukan di database. Silakan pilih balita lain atau hubungi administrator.');
       }
 
-      // Validasi data balita lengkap
+      // Validasi data balita lengkap dengan pesan yang jelas
       if (!selectedBalita.nama_anak) {
-        throw new Error('Data balita tidak lengkap: nama anak tidak ditemukan');
+        throw new Error('Data balita tidak lengkap: nama anak tidak ditemukan. Silakan lengkapi data balita terlebih dahulu di menu "Tambah Balita".');
       }
       if (!selectedBalita.tgl_lahir) {
-        throw new Error('Data balita tidak lengkap: tanggal lahir tidak ditemukan');
+        throw new Error('Data balita tidak lengkap: tanggal lahir tidak ditemukan. Silakan lengkapi data balita terlebih dahulu di menu "Tambah Balita".');
       }
       if (!selectedBalita.jenis_kelamin) {
-        throw new Error('Data balita tidak lengkap: jenis kelamin tidak ditemukan');
+        throw new Error('Data balita tidak lengkap: jenis kelamin tidak ditemukan. Silakan lengkapi data balita terlebih dahulu di menu "Tambah Balita".');
+      }
+
+      // Validasi data numerik opsional
+      if (formData.lila && formData.lila.trim() !== '') {
+        const lilaValue = parseFloat(formData.lila);
+        if (isNaN(lilaValue) || lilaValue <= 0) {
+          throw new Error('Lingkar lengan (LILA) harus berupa angka positif. Contoh: 14.5 (dalam cm).');
+        }
+        if (lilaValue > 50) {
+          throw new Error('Lingkar lengan terlalu besar. Pastikan satuan dalam centimeter (cm).');
+        }
+      }
+
+      if (formData.lingkar_kepala && formData.lingkar_kepala.trim() !== '') {
+        const lkValue = parseFloat(formData.lingkar_kepala);
+        if (isNaN(lkValue) || lkValue <= 0) {
+          throw new Error('Lingkar kepala harus berupa angka positif. Contoh: 45 (dalam cm).');
+        }
+        if (lkValue > 100) {
+          throw new Error('Lingkar kepala terlalu besar. Pastikan satuan dalam centimeter (cm).');
+        }
       }
 
       // ==========================================
@@ -135,19 +185,34 @@ function FormPemeriksaan({ onSuccess }) {
           onSuccess();
         }
       } else {
-        throw new Error(result.message || 'Gagal menyimpan data pemeriksaan');
+        // Pesan error dari API yang lebih jelas
+        const apiErrorMsg = result.message || 'Gagal menyimpan data pemeriksaan';
+        if (apiErrorMsg.includes('Field wajib')) {
+          throw new Error('Data wajib belum lengkap. Pastikan semua field yang wajib sudah diisi dengan benar.');
+        } else if (apiErrorMsg.includes('berat') || apiErrorMsg.includes('tinggi')) {
+          throw new Error('Berat badan dan tinggi badan harus lebih dari 0. Pastikan Anda memasukkan nilai yang benar dalam satuan kg dan cm.');
+        } else {
+          throw new Error(apiErrorMsg + '. Silakan periksa kembali data yang Anda masukkan.');
+        }
       }
     } catch (err) {
       console.error('Error adding pemeriksaan:', err);
       
-      // Error handling yang lebih spesifik
-      let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+      // Error handling yang lebih spesifik dengan pesan yang jelas
+      let errorMessage = 'Terjadi kesalahan saat menyimpan data pemeriksaan.';
       
       if (err.message) {
         errorMessage = err.message;
+      } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi. Jika masalah berlanjut, hubungi administrator.';
+      } else if (err.name === 'NetworkError') {
+        errorMessage = 'Koneksi internet terputus. Pastikan koneksi internet Anda stabil dan coba lagi.';
+      } else {
+        errorMessage = 'Terjadi kesalahan tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.';
       }
       
       setError(errorMessage);
+      showError(errorMessage);
       showError(errorMessage);
     } finally {
       setLoading(false);
@@ -163,11 +228,16 @@ function FormPemeriksaan({ onSuccess }) {
         <h2 className="card-title text-2xl mb-4">Tambah Data Pemeriksaan</h2>
         
         {error && (
-          <div className="alert alert-error mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{error}</span>
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold">Kesalahan Input</p>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 

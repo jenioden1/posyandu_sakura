@@ -92,24 +92,65 @@ function FormTambahBalita({ onSuccess, editingData = null }) {
     setError('');
 
     try {
-      // Validasi
+      // Validasi dengan pesan yang jelas
       if (!formData.nama_anak.trim()) {
-        throw new Error('Nama anak harus diisi');
+        throw new Error('Nama anak wajib diisi. Silakan masukkan nama lengkap anak.');
       }
+      
+      if (formData.nama_anak.trim().length < 2) {
+        throw new Error('Nama anak terlalu pendek. Minimal 2 karakter.');
+      }
+
       if (!formData.nik.trim()) {
-        throw new Error('NIK harus diisi');
+        throw new Error('NIK wajib diisi. Silakan masukkan Nomor Induk Kependudukan (NIK) anak.');
       }
+
+      if (formData.nik.trim().length < 10) {
+        throw new Error('NIK tidak valid. NIK harus minimal 10 digit.');
+      }
+
       if (!formData.tgl_lahir) {
-        throw new Error('Tanggal lahir harus diisi');
+        throw new Error('Tanggal lahir wajib diisi. Silakan pilih tanggal lahir anak.');
       }
+
+      // Validasi tanggal lahir tidak boleh di masa depan
+      const tglLahir = new Date(formData.tgl_lahir);
+      const hariIni = new Date();
+      if (tglLahir > hariIni) {
+        throw new Error('Tanggal lahir tidak boleh di masa depan. Silakan pilih tanggal yang benar.');
+      }
+
+      // Validasi umur maksimal (misalnya 5 tahun untuk balita)
+      const umurTahun = (hariIni - tglLahir) / (1000 * 60 * 60 * 24 * 365);
+      if (umurTahun > 5) {
+        throw new Error('Umur anak melebihi batas balita (5 tahun). Sistem ini khusus untuk balita usia 0-5 tahun.');
+      }
+
       if (!formData.orang_tua_uid) {
-        throw new Error('Akun orang tua harus dipilih');
+        throw new Error('Akun orang tua wajib dipilih. Silakan pilih akun orang tua dari dropdown di atas.');
       }
 
       // Ambil data orang tua untuk nama_ayah dan nama_ibu
       const selectedOrangTua = orangTuaList.find(ot => ot.id === formData.orang_tua_uid);
       if (!selectedOrangTua) {
-        throw new Error('Akun orang tua tidak ditemukan');
+        throw new Error('Akun orang tua yang dipilih tidak ditemukan. Silakan pilih akun orang tua yang valid atau buat akun baru terlebih dahulu.');
+      }
+
+      // Validasi data numerik jika diisi
+      if (formData.bb && (isNaN(parseFloat(formData.bb)) || parseFloat(formData.bb) <= 0)) {
+        throw new Error('Berat badan harus berupa angka positif. Contoh: 5.5 (dalam kg).');
+      }
+
+      if (formData.tb && (isNaN(parseFloat(formData.tb)) || parseFloat(formData.tb) <= 0)) {
+        throw new Error('Tinggi badan harus berupa angka positif. Contoh: 75 (dalam cm).');
+      }
+
+      if (formData.ll && (isNaN(parseFloat(formData.ll)) || parseFloat(formData.ll) <= 0)) {
+        throw new Error('Lingkar lengan harus berupa angka positif. Contoh: 14.5 (dalam cm).');
+      }
+
+      if (formData.lk && (isNaN(parseFloat(formData.lk)) || parseFloat(formData.lk) <= 0)) {
+        throw new Error('Lingkar kepala harus berupa angka positif. Contoh: 45 (dalam cm).');
       }
 
       // Timeout untuk operasi Firestore (max 10 detik)
@@ -196,15 +237,21 @@ function FormTambahBalita({ onSuccess, editingData = null }) {
     } catch (err) {
       console.error('Error adding balita:', err);
       
-      // Error handling yang lebih spesifik
-      let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+      // Error handling yang lebih spesifik dengan pesan yang jelas
+      let errorMessage = 'Terjadi kesalahan saat menyimpan data balita.';
       
       if (err.code === 'permission-denied') {
-        errorMessage = 'Tidak memiliki izin. Periksa Firestore Rules.';
+        errorMessage = 'Akses ditolak. Anda tidak memiliki izin untuk menyimpan data. Hubungi administrator untuk memperbaiki masalah ini.';
       } else if (err.code === 'unavailable') {
-        errorMessage = 'Firestore tidak tersedia. Periksa koneksi internet.';
+        errorMessage = 'Layanan database tidak tersedia. Periksa koneksi internet Anda dan coba lagi. Jika masalah berlanjut, hubungi administrator.';
+      } else if (err.code === 'deadline-exceeded') {
+        errorMessage = 'Waktu permintaan habis. Koneksi internet mungkin lambat. Silakan coba lagi.';
+      } else if (err.code === 'already-exists') {
+        errorMessage = 'Data dengan NIK yang sama sudah ada. Pastikan NIK yang Anda masukkan unik.';
       } else if (err.message) {
         errorMessage = err.message;
+      } else {
+        errorMessage = 'Terjadi kesalahan tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.';
       }
       
       setError(errorMessage);
@@ -221,11 +268,16 @@ function FormTambahBalita({ onSuccess, editingData = null }) {
         </h2>
         
         {error && (
-          <div className="alert alert-error mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{error}</span>
+          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <div className="flex-1">
+                <p className="font-semibold">Kesalahan Input</p>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 

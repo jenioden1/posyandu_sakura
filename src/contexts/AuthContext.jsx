@@ -113,22 +113,28 @@ export function AuthProvider({ children }) {
         
         switch (firebaseError.code) {
           case 'auth/user-not-found':
-            errorMessage = 'Email tidak terdaftar.'
+            errorMessage = 'Email tidak terdaftar dalam sistem. Pastikan Anda telah mendaftar atau hubungi admin untuk membuat akun.'
             break
           case 'auth/wrong-password':
-            errorMessage = 'Password salah.'
+            errorMessage = 'Password yang Anda masukkan salah. Pastikan Caps Lock tidak aktif dan coba lagi. Jika lupa password, hubungi admin.'
             break
           case 'auth/invalid-email':
-            errorMessage = 'Format email tidak valid.'
+            errorMessage = 'Format email tidak valid. Pastikan email Anda mengandung @ dan domain yang benar (contoh: nama@email.com).'
             break
           case 'auth/user-disabled':
-            errorMessage = 'Akun ini telah dinonaktifkan.'
+            errorMessage = 'Akun Anda telah dinonaktifkan oleh administrator. Hubungi admin untuk mengaktifkan kembali akun Anda.'
             break
           case 'auth/too-many-requests':
-            errorMessage = 'Terlalu banyak percobaan login. Silakan coba lagi nanti.'
+            errorMessage = 'Terlalu banyak percobaan login yang gagal. Untuk keamanan, silakan tunggu beberapa menit sebelum mencoba lagi atau reset password.'
+            break
+          case 'auth/network-request-failed':
+            errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.'
+            break
+          case 'auth/invalid-credential':
+            errorMessage = 'Email atau password yang Anda masukkan salah. Pastikan email dan password sudah benar.'
             break
           default:
-            errorMessage = firebaseError.message || 'Login gagal. Silakan coba lagi.'
+            errorMessage = firebaseError.message || 'Login gagal. Silakan periksa kembali email dan password Anda, atau hubungi administrator jika masalah berlanjut.'
         }
         
         return { success: false, message: errorMessage }

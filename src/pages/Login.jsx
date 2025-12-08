@@ -16,6 +16,31 @@ function Login() {
     setError('')
     setLoading(true)
 
+    // Validasi client-side
+    if (!email.trim()) {
+      setError('Email tidak boleh kosong. Silakan masukkan email Anda.')
+      setLoading(false)
+      return
+    }
+
+    if (!email.includes('@') || !email.includes('.')) {
+      setError('Format email tidak valid. Pastikan email Anda mengandung @ dan domain (contoh: nama@email.com).')
+      setLoading(false)
+      return
+    }
+
+    if (!password.trim()) {
+      setError('Password tidak boleh kosong. Silakan masukkan password Anda.')
+      setLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Password minimal 6 karakter. Silakan masukkan password yang lebih panjang.')
+      setLoading(false)
+      return
+    }
+
     try {
       const result = await login(email, password, userType)
       
@@ -29,10 +54,10 @@ function Login() {
           navigate('/user/dashboard')
         }
       } else {
-        setError(result.message || 'Login gagal')
+        setError(result.message || 'Login gagal. Silakan periksa kembali email dan password Anda.')
       }
     } catch (err) {
-      setError('Terjadi kesalahan. Silakan coba lagi.')
+      setError('Terjadi kesalahan pada sistem. Silakan coba lagi dalam beberapa saat atau hubungi administrator jika masalah berlanjut.')
     } finally {
       setLoading(false)
     }
@@ -108,8 +133,16 @@ function Login() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-              {error}
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg">
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-medium">Kesalahan Login</p>
+                  <p className="text-sm mt-1">{error}</p>
+                </div>
+              </div>
             </div>
           )}
 

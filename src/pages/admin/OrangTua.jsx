@@ -55,6 +55,37 @@ function AdminOrangTua() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // Validasi client-side dengan pesan yang jelas
+    if (!formData.username.trim()) {
+      error('Username wajib diisi. Username akan digunakan sebagai email untuk login.')
+      return
+    }
+
+    if (!formData.username.includes('@') || !formData.username.includes('.')) {
+      error('Format email tidak valid. Username harus berupa email yang valid (contoh: nama@email.com).')
+      return
+    }
+
+    if (!formData.password.trim()) {
+      error('Password wajib diisi. Password minimal 6 karakter untuk keamanan.')
+      return
+    }
+
+    if (formData.password.length < 6) {
+      error('Password terlalu pendek. Password minimal 6 karakter untuk keamanan akun.')
+      return
+    }
+
+    if (!formData.nama_ayah.trim()) {
+      error('Nama ayah wajib diisi. Silakan masukkan nama lengkap ayah.')
+      return
+    }
+
+    if (!formData.nama_ibu.trim()) {
+      error('Nama ibu wajib diisi. Silakan masukkan nama lengkap ibu.')
+      return
+    }
+
     try {
       const response = await api.createOrangTua(formData)
       if (response.success) {
@@ -62,11 +93,25 @@ function AdminOrangTua() {
         closeModal()
         loadData()
       } else {
-        error('Gagal membuat akun: ' + (response.message || 'Unknown error'))
+        // Pesan error yang lebih jelas dari API
+        const errorMsg = response.message || 'Gagal membuat akun orang tua'
+        if (errorMsg.includes('email-already-exists') || errorMsg.includes('already exists')) {
+          error('Email sudah terdaftar. Gunakan email lain atau hubungi administrator untuk reset password.')
+        } else if (errorMsg.includes('invalid-email')) {
+          error('Format email tidak valid. Pastikan email mengandung @ dan domain yang benar.')
+        } else if (errorMsg.includes('weak-password')) {
+          error('Password terlalu lemah. Gunakan password minimal 6 karakter dengan kombinasi huruf dan angka.')
+        } else {
+          error('Gagal membuat akun: ' + errorMsg + '. Silakan coba lagi atau hubungi administrator.')
+        }
       }
     } catch (err) {
-      error('Terjadi kesalahan. Silakan coba lagi.')
       console.error('Create error:', err)
+      if (err.message && err.message.includes('network')) {
+        error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi.')
+      } else {
+        error('Terjadi kesalahan pada sistem. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
+      }
     }
   }
 
