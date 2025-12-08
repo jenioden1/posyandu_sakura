@@ -119,20 +119,35 @@ function Home() {
     })
   }
 
-  // Get status badge
+  // Get status badge - Standar WHO: Stunting, Gizi Buruk, Gizi Kurang, Normal, Overweight, Obesitas, Tinggi
   const getStatusBadge = (status) => {
     if (!status) return <span className="badge badge-warning">PENDING</span>
     
     const statusLower = status.toLowerCase()
     
+    // Stunting atau Gizi Buruk (merah)
     if (statusLower.includes('stunting') || statusLower.includes('buruk')) {
       return <span className="badge badge-error">{status}</span>
-    } else if (statusLower.includes('kurang') || statusLower.includes('wasting')) {
+    }
+    // Gizi Kurang atau Wasting (kuning)
+    else if (statusLower.includes('kurang') || statusLower.includes('wasting') || statusLower.includes('underweight')) {
       return <span className="badge badge-warning">{status}</span>
-    } else if (statusLower.includes('normal')) {
+    }
+    // Normal (hijau) - hanya "normal", tidak ada "baik" atau "sehat"
+    else if (statusLower.includes('normal')) {
       return <span className="badge badge-success">{status}</span>
-    } else {
+    }
+    // Overweight atau Obesitas (kuning)
+    else if (statusLower.includes('overweight') || statusLower.includes('obesitas') || statusLower.includes('obese')) {
+      return <span className="badge badge-warning">{status}</span>
+    }
+    // Tinggi (biru)
+    else if (statusLower.includes('tinggi') || statusLower.includes('tall')) {
       return <span className="badge badge-info">{status}</span>
+    }
+    // Default (abu-abu)
+    else {
+      return <span className="badge badge-ghost">{status}</span>
     }
   }
 

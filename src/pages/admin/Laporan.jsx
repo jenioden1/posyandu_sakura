@@ -217,15 +217,12 @@ function AdminLaporan() {
         const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
         const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
         
-        return status.includes('obesitas') ||
-          status.includes('gizi lebih') ||
+        return status.includes('overweight') ||
+          status.includes('obesitas') ||
           statusCompute.includes('overweight') || 
           statusCompute.includes('obesitas') ||
-          statusCompute.includes('gizi lebih') ||
+          statusBBU.includes('overweight') ||
           statusBBU.includes('obesitas') ||
-          statusBBU.includes('gizi lebih') ||
-          p.kategori_bb_u === 'OVERWEIGHT' ||
-          p.kategori_bb_u === 'OBESITAS' ||
           p.kategori_bb_u === 'OVERWEIGHT' ||
           p.kategori_bb_u === 'OBESE'
       }).length
@@ -368,7 +365,7 @@ function AdminLaporan() {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tanggal Mulai
@@ -403,32 +400,36 @@ function AdminLaporan() {
                 </p>
               )}
             </div>
-            <div className="flex items-end">
-              <button
-                onClick={() => setFilterDate({ start: '', end: '' })}
-                className="btn btn-outline w-full"
-                disabled={!filterDate.start && !filterDate.end}
-              >
-                🔄 Reset
-              </button>
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={() => {
-                  const { filteredPemeriksaan, filteredBalita } = getFilteredData()
-                  if (filteredPemeriksaan.length > 0) {
-                    success(`✅ Filter diterapkan: ${filteredPemeriksaan.length} pemeriksaan, ${filteredBalita.length} balita ditampilkan`)
-                  } else {
-                    error('⚠️ Tidak ada data dalam rentang tanggal ini. Coba ubah rentang tanggal.')
-                  }
-                }}
-                className="btn btn-primary w-full"
-                disabled={!filterDate.start && !filterDate.end}
-                title="Klik untuk menerapkan filter (filter juga bekerja realtime saat mengubah tanggal)"
-              >
-                ✅ Terapkan Filter
-              </button>
-            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={() => setFilterDate({ start: '', end: '' })}
+              className="btn btn-outline flex-1"
+              disabled={!filterDate.start && !filterDate.end}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset Filter
+            </button>
+            <button
+              onClick={() => {
+                const { filteredPemeriksaan, filteredBalita } = getFilteredData()
+                if (filteredPemeriksaan.length > 0) {
+                  success(`✅ Filter diterapkan: ${filteredPemeriksaan.length} pemeriksaan, ${filteredBalita.length} balita ditampilkan`)
+                } else {
+                  error('⚠️ Tidak ada data dalam rentang tanggal ini. Coba ubah rentang tanggal.')
+                }
+              }}
+              className="btn btn-primary flex-1"
+              disabled={!filterDate.start && !filterDate.end}
+              title="Filter bekerja realtime saat mengubah tanggal. Tombol ini untuk konfirmasi manual."
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Terapkan Filter
+            </button>
           </div>
           {(filterDate.start || filterDate.end) && (() => {
             const { filteredPemeriksaan: currentFilteredPemeriksaan, filteredBalita: currentFilteredBalita } = getFilteredData()
@@ -498,7 +499,7 @@ function AdminLaporan() {
         <div className="card bg-white shadow-md border border-gray-200">
           <div className="text-sm text-gray-600 mb-1">Overweight</div>
           <div className="text-3xl font-bold text-yellow-600">{stats.overweight}</div>
-          <div className="text-xs text-gray-500 mt-1">Balita dengan gizi lebih/obesitas</div>
+          <div className="text-xs text-gray-500 mt-1">Balita dengan overweight/obesitas</div>
         </div>
       </div>
 
@@ -648,14 +649,26 @@ function AdminLaporan() {
                             <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 hidden md:table-cell">{p.berat || p.bb || '-'}</td>
                             <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 hidden md:table-cell">{p.tinggi || p.tb || '-'}</td>
                             <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 hidden lg:table-cell">
-                              <span className={`badge ${
-                                p.status_gizi_hasil_compute?.includes('Normal') ? 'badge-success' :
-                                p.status_gizi_hasil_compute?.includes('STUNTING') || p.status_gizi_hasil_compute?.includes('Pendek') ? 'badge-warning' :
-                                p.status_gizi_hasil_compute?.includes('WASTING') || p.status_gizi_hasil_compute?.includes('Gizi Kurang') ? 'badge-error' :
-                                'badge-info'
-                              }`}>
-                                {p.status_gizi_hasil_compute || p.status_gizi || '-'}
-                              </span>
+                              {(() => {
+                                const status = (p.status_gizi_hasil_compute || p.status_gizi || '').toLowerCase()
+                                let badgeClass = 'badge-ghost'
+                                if (status.includes('stunting') || status.includes('buruk')) {
+                                  badgeClass = 'badge-error'
+                                } else if (status.includes('kurang') || status.includes('wasting') || status.includes('underweight')) {
+                                  badgeClass = 'badge-warning'
+                                } else if (status.includes('normal')) {
+                                  badgeClass = 'badge-success'
+                                } else if (status.includes('overweight') || status.includes('obesitas') || status.includes('obese')) {
+                                  badgeClass = 'badge-warning'
+                                } else if (status.includes('tinggi') || status.includes('tall')) {
+                                  badgeClass = 'badge-info'
+                                }
+                                return (
+                                  <span className={`badge ${badgeClass}`}>
+                                    {p.status_gizi_hasil_compute || p.status_gizi || '-'}
+                                  </span>
+                                )
+                              })()}
                             </td>
                           </tr>
                         ))

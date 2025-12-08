@@ -233,7 +233,7 @@ function Statistik() {
         <div className="card bg-white shadow-md border border-gray-200">
           <div className="text-sm text-gray-600 mb-1">Overweight</div>
           <div className="text-3xl font-bold text-yellow-600">{stats.overweight}</div>
-          <div className="text-xs text-gray-500 mt-1">Balita dengan gizi lebih/obesitas</div>
+          <div className="text-xs text-gray-500 mt-1">Balita dengan overweight/obesitas</div>
         </div>
       </div>
 
