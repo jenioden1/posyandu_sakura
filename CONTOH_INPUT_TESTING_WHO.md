@@ -143,10 +143,10 @@ Dokumen ini berisi contoh input data untuk testing setiap klasifikasi status giz
 
 ---
 
-#### 8. **Berisiko Lebih** (Z-Score: +2 sampai +3)
+#### 8. **Overweight** (Z-Score: +2 sampai +3)
 ```json
 {
-  "nama": "Anak Berisiko Lebih",
+  "nama": "Anak Overweight",
   "tgl_lahir": "2023-01-15",  // Umur ~12 bulan
   "jenis_kelamin": "L",
   "berat": 12.0,  // kg (lebih berat dari normal)
@@ -154,8 +154,8 @@ Dokumen ini berisi contoh input data untuk testing setiap klasifikasi status giz
 }
 ```
 **Hasil yang Diharapkan:**
-- `status_gizi_bb_u`: "Berisiko Lebih"
-- `kategori_bb_u`: "AT_RISK_OVERWEIGHT"
+- `status_gizi_bb_u`: "Overweight"
+- `kategori_bb_u`: "OVERWEIGHT"
 - `z_score_bb_u`: antara +2 dan +3
 
 ---

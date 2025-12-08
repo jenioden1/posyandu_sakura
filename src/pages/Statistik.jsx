@@ -114,16 +114,13 @@ function Statistik() {
       const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
       const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
       
-      return status.includes('obesitas') ||
-        status.includes('gizi lebih') ||
+      return status.includes('overweight') ||
+        status.includes('obesitas') ||
         statusCompute.includes('overweight') || 
         statusCompute.includes('obesitas') ||
-        statusCompute.includes('gizi lebih') ||
+        statusBBU.includes('overweight') ||
         statusBBU.includes('obesitas') ||
-        statusBBU.includes('gizi lebih') ||
         p.kategori_bb_u === 'OVERWEIGHT' ||
-        p.kategori_bb_u === 'OBESITAS' ||
-        p.kategori_bb_u === 'AT_RISK_OVERWEIGHT' ||
         p.kategori_bb_u === 'OBESE'
     }).length
 

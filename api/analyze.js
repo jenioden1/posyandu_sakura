@@ -125,11 +125,11 @@ function classifyStatusGizi(zScore, type) {
   }
   
   if (type === 'BB_U') {
-    // Underweight (BB/U)
+    // Underweight (BB/U) - Standar WHO
     if (zScore < -3) return { status: 'Gizi Buruk', kategori: 'SEVERE_UNDERWEIGHT', z_score: zScore };
     if (zScore < -2) return { status: 'Gizi Kurang', kategori: 'UNDERWEIGHT', z_score: zScore };
     if (zScore >= -2 && zScore <= 2) return { status: 'Normal', kategori: 'NORMAL', z_score: zScore };
-    if (zScore > 2 && zScore <= 3) return { status: 'Berisiko Lebih', kategori: 'AT_RISK_OVERWEIGHT', z_score: zScore };
+    if (zScore > 2 && zScore <= 3) return { status: 'Overweight', kategori: 'OVERWEIGHT', z_score: zScore };
     if (zScore > 3) return { status: 'Obesitas', kategori: 'OBESE', z_score: zScore };
   }
   
@@ -170,7 +170,7 @@ function computeStatusGiziWHO({ berat, tinggi, umur_bulan, jenis_kelamin }) {
     status_gizi_utama = statusBB_U.status;
   } else if (statusBB_U.kategori === 'UNDERWEIGHT') {
     status_gizi_utama = statusBB_U.status;
-  } else if (statusBB_U.kategori === 'OBESE' || statusBB_U.kategori === 'AT_RISK_OVERWEIGHT') {
+  } else if (statusBB_U.kategori === 'OBESE' || statusBB_U.kategori === 'OVERWEIGHT') {
     status_gizi_utama = statusBB_U.status;
   } else if (statusTB_U.kategori === 'NORMAL' && statusBB_U.kategori === 'NORMAL') {
     status_gizi_utama = 'Normal';

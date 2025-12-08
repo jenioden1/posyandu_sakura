@@ -61,8 +61,8 @@ function UserDashboard() {
     else if (statusLower.includes('normal') || statusLower.includes('baik')) {
       return <span className="badge badge-success badge-sm">{statusText}</span>
     }
-    // Overweight atau Obesitas (orange)
-    else if (statusLower.includes('lebih') || statusLower.includes('obesitas') || statusLower.includes('overweight') || statusLower.includes('obese')) {
+    // Overweight atau Obesitas (kuning)
+    else if (statusLower.includes('overweight') || statusLower.includes('obesitas') || statusLower.includes('obese')) {
       return <span className="badge badge-warning badge-sm">{statusText}</span>
     }
     // Tinggi (biru)

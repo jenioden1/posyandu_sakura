@@ -113,6 +113,7 @@ function AdminLaporan() {
 
     // Jika ada filter tanggal, terapkan filter
     if (filterDate.start || filterDate.end) {
+      // Filter pemeriksaan berdasarkan tanggal
       filteredPemeriksaan = filteredPemeriksaan.filter(p => {
         const tgl = getPemeriksaanDate(p)
         
@@ -151,6 +152,10 @@ function AdminLaporan() {
         // Jika semua kondisi terpenuhi, include data ini
         return true
       })
+
+      // Filter balita: hanya tampilkan balita yang memiliki pemeriksaan dalam rentang tanggal
+      const balitaIdsWithPemeriksaan = new Set(filteredPemeriksaan.map(p => p.balita_id).filter(id => id))
+      filteredBalita = filteredBalita.filter(b => balitaIdsWithPemeriksaan.has(b.id))
     }
 
     return { filteredPemeriksaan, filteredBalita }
@@ -221,7 +226,7 @@ function AdminLaporan() {
           statusBBU.includes('gizi lebih') ||
           p.kategori_bb_u === 'OVERWEIGHT' ||
           p.kategori_bb_u === 'OBESITAS' ||
-          p.kategori_bb_u === 'AT_RISK_OVERWEIGHT' ||
+          p.kategori_bb_u === 'OVERWEIGHT' ||
           p.kategori_bb_u === 'OBESE'
       }).length
     }
@@ -363,7 +368,7 @@ function AdminLaporan() {
               </span>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tanggal Mulai
@@ -377,7 +382,7 @@ function AdminLaporan() {
               />
               {filterDate.start && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Menampilkan data dari: {formatTanggal(filterDate.start)}
+                  Dari: {formatTanggal(filterDate.start)}
                 </p>
               )}
             </div>
@@ -394,7 +399,7 @@ function AdminLaporan() {
               />
               {filterDate.end && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Sampai dengan: {formatTanggal(filterDate.end)}
+                  Sampai: {formatTanggal(filterDate.end)}
                 </p>
               )}
             </div>
@@ -404,26 +409,57 @@ function AdminLaporan() {
                 className="btn btn-outline w-full"
                 disabled={!filterDate.start && !filterDate.end}
               >
-                Reset Filter
+                🔄 Reset
+              </button>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  const { filteredPemeriksaan, filteredBalita } = getFilteredData()
+                  if (filteredPemeriksaan.length > 0) {
+                    success(`✅ Filter diterapkan: ${filteredPemeriksaan.length} pemeriksaan, ${filteredBalita.length} balita ditampilkan`)
+                  } else {
+                    error('⚠️ Tidak ada data dalam rentang tanggal ini. Coba ubah rentang tanggal.')
+                  }
+                }}
+                className="btn btn-primary w-full"
+                disabled={!filterDate.start && !filterDate.end}
+                title="Klik untuk menerapkan filter (filter juga bekerja realtime saat mengubah tanggal)"
+              >
+                ✅ Terapkan Filter
               </button>
             </div>
           </div>
-          {(filterDate.start || filterDate.end) && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-700">
-                <strong>Info Filter:</strong> Menampilkan {filteredPemeriksaan.length} dari {pemeriksaanList.length} pemeriksaan
-                {filterDate.start && filterDate.end && (
-                  <span> dalam rentang {formatTanggal(filterDate.start)} - {formatTanggal(filterDate.end)}</span>
+          {(filterDate.start || filterDate.end) && (() => {
+            const { filteredPemeriksaan: currentFilteredPemeriksaan, filteredBalita: currentFilteredBalita } = getFilteredData()
+            return (
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-700 font-semibold mb-2">
+                  📊 Info Filter Aktif (Realtime)
+                </p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• <strong>Pemeriksaan:</strong> {currentFilteredPemeriksaan.length} dari {pemeriksaanList.length} total</li>
+                  <li>• <strong>Balita:</strong> {currentFilteredBalita.length} dari {balitaList.length} total 
+                    <span className="text-xs text-gray-500"> (hanya yang memiliki pemeriksaan dalam rentang tanggal)</span>
+                  </li>
+                  {filterDate.start && filterDate.end && (
+                    <li>• <strong>Rentang:</strong> {formatTanggal(filterDate.start)} <strong>sampai</strong> {formatTanggal(filterDate.end)}</li>
+                  )}
+                  {filterDate.start && !filterDate.end && (
+                    <li>• <strong>Mulai dari:</strong> {formatTanggal(filterDate.start)}</li>
+                  )}
+                  {!filterDate.start && filterDate.end && (
+                    <li>• <strong>Sampai dengan:</strong> {formatTanggal(filterDate.end)}</li>
+                  )}
+                </ul>
+                {currentFilteredPemeriksaan.length === 0 && (
+                  <p className="text-sm text-orange-600 mt-2 font-medium">
+                    ⚠️ Tidak ada data pemeriksaan dalam rentang tanggal ini. Coba ubah rentang tanggal atau reset filter.
+                  </p>
                 )}
-                {filterDate.start && !filterDate.end && (
-                  <span> mulai dari {formatTanggal(filterDate.start)}</span>
-                )}
-                {!filterDate.start && filterDate.end && (
-                  <span> sampai dengan {formatTanggal(filterDate.end)}</span>
-                )}
-              </p>
-            </div>
-          )}
+              </div>
+            )
+          })()}
         </div>
       </div>
 
