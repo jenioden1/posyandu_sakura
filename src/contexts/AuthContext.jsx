@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
         const tokenResult = await getIdTokenResult(firebaseUser)
         const userRole = tokenResult.claims.role || 'orang_tua'
         
-        // Verify user type matches
+        // Allow flexible login: admin can login as admin or orang_tua, orang_tua can only login as orang_tua
         if (type === 'admin' && userRole !== 'admin') {
           await signOut(auth)
           return { 
@@ -96,9 +96,10 @@ export function AuthProvider({ children }) {
           }
         }
         
+        // Admin can login as orang_tua (to view as parent), but orang_tua cannot login as admin
         if (type === 'orang_tua' && userRole === 'admin') {
-          // Admin can login as orang_tua too (optional)
-          // Or you can restrict: return { success: false, message: 'Admin harus login sebagai Admin' }
+          // Allow admin to login as orang_tua (optional feature)
+          // This allows admin to see parent view
         }
         
         // User is already set by onAuthStateChanged listener

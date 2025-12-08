@@ -165,24 +165,24 @@ function Home() {
 
       {/* Statistik Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <div className="text-sm opacity-90">Total Balita</div>
-          <div className="text-3xl font-bold">{stats.total_balita}</div>
+        <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg drop-shadow-md">
+          <div className="text-sm opacity-95">Total Balita</div>
+          <div className="text-3xl font-bold leading-tight">{stats.total_balita}</div>
         </div>
         
-        <div className="card bg-gradient-to-br from-green-500 to-green-600 text-white">
-          <div className="text-sm opacity-90">Total Pemeriksaan</div>
-          <div className="text-3xl font-bold">{stats.total_pemeriksaan}</div>
+        <div className="card bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg drop-shadow-md">
+          <div className="text-sm opacity-95">Total Pemeriksaan</div>
+          <div className="text-3xl font-bold leading-tight">{stats.total_pemeriksaan}</div>
         </div>
         
-        <div className="card bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
-          <div className="text-sm opacity-90">Status Normal</div>
-          <div className="text-3xl font-bold">{stats.normal}</div>
+        <div className="card bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900 shadow-lg">
+          <div className="text-sm font-semibold opacity-95">Status Normal</div>
+          <div className="text-3xl font-bold leading-tight">{stats.normal}</div>
         </div>
         
-        <div className="card bg-gradient-to-br from-red-500 to-red-600 text-white">
-          <div className="text-sm opacity-90">Perlu Perhatian</div>
-          <div className="text-3xl font-bold">{stats.stunting + stats.wasting}</div>
+        <div className="card bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg drop-shadow-md">
+          <div className="text-sm opacity-95">Perlu Perhatian</div>
+          <div className="text-3xl font-bold leading-tight">{stats.stunting + stats.wasting}</div>
         </div>
       </div>
 
@@ -271,8 +271,16 @@ function Home() {
                       <td className="font-semibold">
                         {balita?.nama_anak || balita?.nama || 'Tidak diketahui'}
                       </td>
-                      <td>{pemeriksaan.bb?.toFixed(1) || pemeriksaan.berat_badan?.toFixed(1) || '-'}</td>
-                      <td>{pemeriksaan.tb?.toFixed(1) || pemeriksaan.tinggi_badan?.toFixed(1) || '-'}</td>
+                      <td>
+                        {pemeriksaan.berat ? `${pemeriksaan.berat.toFixed(1)} kg` : 
+                         pemeriksaan.bb ? `${pemeriksaan.bb.toFixed(1)} kg` : 
+                         pemeriksaan.berat_badan ? `${pemeriksaan.berat_badan.toFixed(1)} kg` : '-'}
+                      </td>
+                      <td>
+                        {pemeriksaan.tinggi ? `${pemeriksaan.tinggi.toFixed(1)} cm` : 
+                         pemeriksaan.tb ? `${pemeriksaan.tb.toFixed(1)} cm` : 
+                         pemeriksaan.tinggi_badan ? `${pemeriksaan.tinggi_badan.toFixed(1)} cm` : '-'}
+                      </td>
                       <td>{getStatusBadge(pemeriksaan.status_gizi_hasil_compute || pemeriksaan.status_gizi)}</td>
                       <td>{formatDate(pemeriksaan.tgl_ukur)}</td>
                     </tr>

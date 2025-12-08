@@ -14,7 +14,6 @@ function AdminLayout() {
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
     { path: '/admin/manajemen-balita', label: 'Manajemen Balita', icon: '👶' },
-    { path: '/admin/balita', label: 'Data Balita (Legacy)', icon: '📋' },
     { path: '/admin/orang-tua', label: 'Akun Orang Tua', icon: '👨‍👩‍👧' },
     { path: '/admin/laporan', label: 'Laporan', icon: '📄' },
   ]

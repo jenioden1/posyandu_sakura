@@ -34,6 +34,14 @@ function PublicLayout() {
                     Statistik
                   </Link>
                 </li>
+                <li>
+                  <Link 
+                    to="/tentang" 
+                    className={`${location.pathname === '/tentang' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-blue-600'}`}
+                  >
+                    Tentang
+                  </Link>
+                </li>
                 {userType === 'orang_tua' && (
                   <li>
                     <Link to="/user/dashboard" className="text-gray-600 hover:text-blue-600">

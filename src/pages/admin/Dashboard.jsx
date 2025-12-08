@@ -6,7 +6,6 @@ import { formatTanggal } from '../../utils/helpers'
 function AdminDashboard() {
   const [stats, setStats] = useState({
     total_balita: 0,
-    total_penimbangan: 0,
     total_vit_a: 0,
     total_oralit: 0,
     total_orang_tua: 0
@@ -29,7 +28,6 @@ function AdminDashboard() {
         const data = balitaRes.data || []
         setStats({
           total_balita: data.length,
-          total_penimbangan: data.reduce((sum, b) => sum + (b.penimbangan?.length || 0), 0),
           total_vit_a: data.filter(b => (b.pelayanan || '').toLowerCase().includes('vitamin a')).length,
           total_oralit: data.filter(b => (b.pelayanan || '').toLowerCase().includes('oralit')).length,
           total_orang_tua: orangTuaRes.success ? (orangTuaRes.data || []).length : 0
@@ -71,16 +69,11 @@ function AdminDashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="card">
           <div className="text-sm text-gray-600 mb-1">Total Balita</div>
           <div className="text-3xl font-bold text-gray-800">{stats.total_balita}</div>
           <div className="text-xs text-gray-500 mt-1">Jumlah balita yang terdaftar</div>
-        </div>
-        <div className="card">
-          <div className="text-sm text-gray-600 mb-1">Total Penimbangan</div>
-          <div className="text-3xl font-bold text-gray-800">{stats.total_penimbangan}</div>
-          <div className="text-xs text-gray-500 mt-1">Akumulasi semua penimbangan</div>
         </div>
         <div className="card">
           <div className="text-sm text-gray-600 mb-1">Balita dengan Vitamin A</div>

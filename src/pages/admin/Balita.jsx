@@ -16,9 +16,7 @@ function AdminBalita() {
     tb: '',
     ll: '',
     lk: '',
-    nama_ayah: '',
-    nama_ibu: '',
-    orang_tua_id: '',
+    orang_tua_uid: '',
     pelayanan_vit_a: false,
     pelayanan_oralit: false,
     keterangan: ''
@@ -60,9 +58,7 @@ function AdminBalita() {
         tb: balita.tb || '',
         ll: balita.ll || '',
         lk: balita.lk || '',
-        nama_ayah: balita.nama_ayah || '',
-        nama_ibu: balita.nama_ibu || '',
-        orang_tua_id: balita.orang_tua_id || '',
+        orang_tua_uid: balita.orang_tua_uid || balita.orang_tua_id || '',
         pelayanan_vit_a: (balita.pelayanan || '').toLowerCase().includes('vitamin a'),
         pelayanan_oralit: (balita.pelayanan || '').toLowerCase().includes('oralit'),
         keterangan: balita.keterangan || ''
@@ -77,9 +73,7 @@ function AdminBalita() {
         tb: '',
         ll: '',
         lk: '',
-        nama_ayah: '',
-        nama_ibu: '',
-        orang_tua_id: '',
+        orang_tua_uid: '',
         pelayanan_vit_a: false,
         pelayanan_oralit: false,
         keterangan: ''
@@ -97,25 +91,24 @@ function AdminBalita() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // ✅ HANYA KIRIM DATA MENTAH - TIDAK ADA PERHITUNGAN DI SINI
-    // Semua logika perhitungan, validasi, dan business logic ada di Cloud Functions
+    if (!formData.orang_tua_uid) {
+      alert('Pilih akun orang tua terlebih dahulu');
+      return;
+    }
+
     const rawData = {
       ...(editingId && { id: editingId }),
       nama_anak: formData.nama_anak.trim(),
-      nama_ayah: formData.nama_ayah.trim(),
-      nama_ibu: formData.nama_ibu.trim(),
-      tanggal_lahir: formData.tgl_lahir,
+      tgl_lahir: formData.tgl_lahir,
       bb: formData.bb ? parseFloat(formData.bb) : null,
       tb: formData.tb ? parseFloat(formData.tb) : null,
-      lingkar_leher: formData.ll ? parseFloat(formData.ll) : null, // CATATAN: Pastikan mapping field benar
-      lingkar_kepala: formData.lk ? parseFloat(formData.lk) : null,
-      vitamin_a: formData.pelayanan_vit_a, // HANYA boolean, bukan string
-      // TIDAK ada perhitungan status gizi di sini!
-      // TIDAK ada validasi kompleks di sini!
-      // TIDAK ada format pelayanan di sini!
+      ll: formData.ll ? parseFloat(formData.ll) : null,
+      lk: formData.lk ? parseFloat(formData.lk) : null,
+      pelayanan_vit_a: formData.pelayanan_vit_a,
+      pelayanan_oralit: formData.pelayanan_oralit,
       keterangan: formData.keterangan || null,
-      penimbangan: penimbangan, // Data penimbangan tetap dikirim
-      ...(formData.orang_tua_id && { orang_tua_id: formData.orang_tua_id })
+      penimbangan: penimbangan,
+      orang_tua_id: formData.orang_tua_uid,
     }
 
     try {
@@ -383,31 +376,12 @@ function AdminBalita() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Ayah *</label>
-                  <input
-                    type="text"
-                    value={formData.nama_ayah}
-                    onChange={(e) => setFormData({...formData, nama_ayah: e.target.value})}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Ibu *</label>
-                  <input
-                    type="text"
-                    value={formData.nama_ibu}
-                    onChange={(e) => setFormData({...formData, nama_ibu: e.target.value})}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Akun Orang Tua</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Akun Orang Tua *</label>
                   <select
-                    value={formData.orang_tua_id}
-                    onChange={(e) => setFormData({...formData, orang_tua_id: e.target.value})}
+                    value={formData.orang_tua_uid}
+                    onChange={(e) => setFormData({...formData, orang_tua_uid: e.target.value})}
                     className="select"
+                    required
                   >
                     <option value="">-- Pilih Orang Tua --</option>
                     {orangTuaList.map(ot => (
@@ -416,6 +390,7 @@ function AdminBalita() {
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-gray-500 mt-1">Nama ayah dan ibu akan diambil dari akun yang dipilih</p>
                 </div>
               </div>
 

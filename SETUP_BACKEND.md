@@ -163,7 +163,37 @@ export default async function handler(req, res) {
 - Deploy: `vercel --prod` (atau via Git).
 - Uji produksi: `POST https://<your-vercel-app>/api/analyze`.
 
-## K. Penyesuaian Lanjutan
+## K. Alur GitHub → Vercel (Direkomendasikan)
+1) Inisialisasi & commit lokal (jika belum)
+   ```
+   git init
+   git add .
+   git commit -m "chore: init project"
+   ```
+2) Buat repo GitHub (kosong) → salin URL.
+3) Hubungkan remote & push
+   ```
+   git remote add origin <URL-remote>
+   git push -u origin main
+   ```
+   (Sesuaikan nama branch jika perlu.)
+4) Import ke Vercel
+   - Vercel Dashboard → Add New Project → pilih repo GitHub.
+   - Root directory: biarkan default (root repo, karena ada `package.json` & `api/`).
+   - Build command: otomatis (Vite) atau `npm run build`.
+   - Output dir: `dist`.
+5) Set Environment di Vercel
+   - Project Settings → Environment Variables.
+   - Tambah `FIREBASE_SERVICE_ACCOUNT` (JSON satu baris) untuk Dev/Preview/Prod.
+   - Save.
+6) Deploy otomatis
+   - Vercel akan build & deploy setelah import.
+   - URL preview/production akan tersedia.
+7) Alur kerja selanjutnya
+   - Setiap perubahan: `git add . && git commit -m "..." && git push`.
+   - Vercel auto-deploy setiap push ke branch terkait.
+
+## L. Penyesuaian Lanjutan
 - Ganti `computeStatusGiziDummy` dengan perhitungan Z-Score WHO sesungguhnya.
 - Perketat Firestore Rules untuk produksi.
 - Tambah validasi satuan (kg/cm), logging, dan error handling sesuai kebutuhan.

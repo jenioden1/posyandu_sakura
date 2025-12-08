@@ -9,11 +9,13 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { useToastContext } from '../../contexts/ToastContext';
 
 function FormPemeriksaan({ onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [balitaList, setBalitaList] = useState([]);
+  const { success, error: showError } = useToastContext();
   const [formData, setFormData] = useState({
     balita_id: '',
     tgl_ukur: new Date().toISOString().split('T')[0], // Default hari ini
@@ -57,7 +59,7 @@ function FormPemeriksaan({ onSuccess }) {
 
     try {
       // ==========================================
-      // VALIDASI DATA MENTAH (Dumb Client)
+      // VALIDASI DATA MENTAH
       // ==========================================
       if (!formData.balita_id) {
         throw new Error('Pilih nama anak terlebih dahulu');
@@ -72,12 +74,69 @@ function FormPemeriksaan({ onSuccess }) {
         throw new Error('Tinggi badan harus lebih dari 0');
       }
 
+      // Ambil data balita lengkap untuk perhitungan WHO
+      const selectedBalita = balitaList.find(b => b.id === formData.balita_id);
+      if (!selectedBalita) {
+        throw new Error('Data balita tidak ditemukan');
+      }
+
+      // Validasi data balita lengkap
+      if (!selectedBalita.nama_anak) {
+        throw new Error('Data balita tidak lengkap: nama anak tidak ditemukan');
+      }
+      if (!selectedBalita.tgl_lahir) {
+        throw new Error('Data balita tidak lengkap: tanggal lahir tidak ditemukan');
+      }
+      if (!selectedBalita.jenis_kelamin) {
+        throw new Error('Data balita tidak lengkap: jenis kelamin tidak ditemukan');
+      }
+
       // ==========================================
-      // TODO: Implementasi backend baru
-      // Backend sebelumnya sudah dihapus, perlu implementasi baru
+      // KIRIM DATA LENGKAP KE API ANALYZE
       // ==========================================
-      
-      throw new Error('Backend belum tersedia. Silakan implementasikan backend terlebih dahulu.');
+      const payload = {
+        nama: selectedBalita.nama_anak,
+        tgl_lahir: selectedBalita.tgl_lahir,
+        jenis_kelamin: selectedBalita.jenis_kelamin,
+        berat: parseFloat(formData.bb),
+        tinggi: parseFloat(formData.tb),
+        lila: formData.lila ? parseFloat(formData.lila) : null,
+        lingkar_kepala: formData.lingkar_kepala ? parseFloat(formData.lingkar_kepala) : null,
+        balita_id: formData.balita_id, // Tambahkan balita_id untuk referensi
+        tgl_ukur: formData.tgl_ukur // Tambahkan tanggal pengukuran
+      };
+
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        // Reset form
+        setFormData({
+          balita_id: '',
+          tgl_ukur: new Date().toISOString().split('T')[0],
+          bb: '',
+          tb: '',
+          lingkar_kepala: '',
+          lila: ''
+        });
+
+        // Show success toast
+        success(`Data pemeriksaan berhasil disimpan! Status gizi: ${result.data.status_gizi}`);
+
+        // Callback success
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        throw new Error(result.message || 'Gagal menyimpan data pemeriksaan');
+      }
     } catch (err) {
       console.error('Error adding pemeriksaan:', err);
       
@@ -89,6 +148,7 @@ function FormPemeriksaan({ onSuccess }) {
       }
       
       setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -98,7 +158,7 @@ function FormPemeriksaan({ onSuccess }) {
   const selectedBalita = balitaList.find(b => b.id === formData.balita_id);
 
   return (
-    <div className="card bg-base-100 shadow-xl">
+    <div className="card bg-white shadow-md border border-gray-200">
       <div className="card-body">
         <h2 className="card-title text-2xl mb-4">Tambah Data Pemeriksaan</h2>
         
@@ -231,14 +291,21 @@ function FormPemeriksaan({ onSuccess }) {
           </div>
 
           {/* Info */}
-          <div className="alert alert-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
-            <span className="text-sm">
-              <strong>Perhatian:</strong> Backend belum tersedia. Form ini memerlukan implementasi backend untuk memproses data pemeriksaan.
-            </span>
-          </div>
+          {selectedBalita && (
+            <div className="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span className="text-sm">
+                <strong>Info:</strong> Data akan dianalisis menggunakan standar WHO untuk menentukan status gizi anak.
+                {!selectedBalita.nama_anak || !selectedBalita.tgl_lahir || !selectedBalita.jenis_kelamin ? (
+                  <span className="text-warning block mt-1">
+                    ⚠️ Data balita belum lengkap. Pastikan nama, tanggal lahir, dan jenis kelamin sudah terisi.
+                  </span>
+                ) : null}
+              </span>
+            </div>
+          )}
 
           {/* Submit Button */}
           <div className="form-control mt-6">

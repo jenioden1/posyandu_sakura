@@ -16,6 +16,37 @@
 }
 
 @layer components {
+  /* Toast Animations */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
   }
@@ -39,13 +70,39 @@
   .card {
     @apply bg-white rounded-xl shadow-md p-6 border border-gray-100 text-gray-800;
   }
+
+  /* Improve readability on gradient cards */
+  .card.shadow-lg {
+    box-shadow: 0 10px 30px -12px rgba(0,0,0,0.35);
+  }
+
+  .card :is(h1,h2,h3,h4,div,span) {
+    @apply leading-tight;
+  }
   
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800;
   }
   
   .select {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-800;
+  }
+
+  /* Global form readability */
+  input, select, textarea {
+    @apply text-gray-800 bg-white;
+  }
+
+  ::placeholder {
+    @apply text-gray-400;
+  }
+
+  .label-text {
+    @apply text-gray-800;
+  }
+
+  .label-text-alt {
+    @apply text-gray-600;
   }
 
   /* Table readability */

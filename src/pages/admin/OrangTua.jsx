@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { api } from '../../utils/api'
 import { formatTanggal } from '../../utils/helpers'
+import { useToastContext } from '../../contexts/ToastContext'
+import ConfirmDialog from '../../components/common/ConfirmDialog'
 
 function AdminOrangTua() {
   const [orangTuaList, setOrangTuaList] = useState([])
@@ -14,6 +16,8 @@ function AdminOrangTua() {
     no_telp: ''
   })
   const [loading, setLoading] = useState(true)
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, onConfirm: null, message: '' })
+  const { success, error } = useToastContext()
 
   useEffect(() => {
     loadData()
@@ -54,32 +58,37 @@ function AdminOrangTua() {
     try {
       const response = await api.createOrangTua(formData)
       if (response.success) {
-        alert('Akun orang tua berhasil dibuat')
+        success('Akun orang tua berhasil dibuat')
         closeModal()
         loadData()
       } else {
-        alert('Gagal membuat akun: ' + (response.message || 'Unknown error'))
+        error('Gagal membuat akun: ' + (response.message || 'Unknown error'))
       }
-    } catch (error) {
-      alert('Terjadi kesalahan. Silakan coba lagi.')
-      console.error('Create error:', error)
+    } catch (err) {
+      error('Terjadi kesalahan. Silakan coba lagi.')
+      console.error('Create error:', err)
     }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Yakin ingin menghapus akun orang tua ini?')) return
-
-    try {
-      const response = await api.deleteOrangTua(id)
-      if (response.success) {
-        loadData()
-      } else {
-        alert('Gagal menghapus: ' + (response.message || 'Unknown error'))
-      }
-    } catch (error) {
-      alert('Terjadi kesalahan. Silakan coba lagi.')
-      console.error('Delete error:', error)
-    }
+  const handleDelete = (id) => {
+    setConfirmDialog({
+      isOpen: true,
+      onConfirm: async () => {
+        try {
+          const response = await api.deleteOrangTua(id)
+          if (response.success) {
+            success('Akun orang tua berhasil dihapus')
+            loadData()
+          } else {
+            error('Gagal menghapus: ' + (response.message || 'Unknown error'))
+          }
+        } catch (err) {
+          error('Terjadi kesalahan. Silakan coba lagi.')
+          console.error('Delete error:', err)
+        }
+      },
+      message: 'Yakin ingin menghapus akun orang tua ini? Tindakan ini tidak dapat dibatalkan.'
+    })
   }
 
   if (loading) {
@@ -236,6 +245,16 @@ function AdminOrangTua() {
           </div>
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, onConfirm: null, message: '' })}
+        onConfirm={confirmDialog.onConfirm || (() => {})}
+        title="Konfirmasi Hapus"
+        message={confirmDialog.message}
+        type="danger"
+      />
     </div>
   )
 }

@@ -146,7 +146,7 @@ function TabelRiwayat() {
   }
 
   return (
-    <div className="card bg-base-100 shadow-xl">
+    <div className="card bg-white shadow-md border border-gray-200">
       <div className="card-body">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <h2 className="card-title text-2xl">Riwayat Pemeriksaan Balita</h2>
@@ -187,6 +187,8 @@ function TabelRiwayat() {
                 <th>Umur</th>
                 <th>BB (kg)</th>
                 <th>TB (cm)</th>
+                <th>LL (cm)</th>
+                <th>LK (cm)</th>
                 <th>Status Gizi</th>
                 <th>Tgl. Ukur</th>
               </tr>
@@ -194,7 +196,7 @@ function TabelRiwayat() {
             <tbody>
               {pemeriksaanList.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-8">
+                  <td colSpan="10" className="text-center py-8">
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -226,10 +228,26 @@ function TabelRiwayat() {
                         </span>
                       </td>
                       <td>{item.umur_bulan ? `${item.umur_bulan.toFixed(1)} bln` : (balita ? calculateAge(balita.tgl_lahir) : '-')}</td>
-                      <td className="font-medium">{item.bb?.toFixed(1) || item.berat_badan?.toFixed(1) || '-'}</td>
-                      <td className="font-medium">{item.tb?.toFixed(1) || item.tinggi_badan?.toFixed(1) || '-'}</td>
+                      <td className="font-medium">
+                        {item.berat ? `${item.berat.toFixed(1)} kg` : 
+                         item.bb ? `${item.bb.toFixed(1)} kg` : 
+                         item.berat_badan ? `${item.berat_badan.toFixed(1)} kg` : '-'}
+                      </td>
+                      <td className="font-medium">
+                        {item.tinggi ? `${item.tinggi.toFixed(1)} cm` : 
+                         item.tb ? `${item.tb.toFixed(1)} cm` : 
+                         item.tinggi_badan ? `${item.tinggi_badan.toFixed(1)} cm` : '-'}
+                      </td>
+                      <td className="font-medium">
+                        {item.lila ? `${item.lila.toFixed(1)} cm` : 
+                         item.ll ? `${item.ll.toFixed(1)} cm` : '-'}
+                      </td>
+                      <td className="font-medium">
+                        {item.lingkar_kepala ? `${item.lingkar_kepala.toFixed(1)} cm` : 
+                         item.lk ? `${item.lk.toFixed(1)} cm` : '-'}
+                      </td>
                       <td>{getStatusBadge(item.status_gizi_hasil_compute || item.status_gizi)}</td>
-                      <td>{formatDate(item.tgl_ukur)}</td>
+                      <td>{formatDate(item.tgl_ukur || item.created_at)}</td>
                     </tr>
                   );
                 })

@@ -38,73 +38,75 @@ export const api = {
 
   // Admin
   adminGetBalita: async () => {
-    const response = await fetch(`${API_BASE}/admin_get_balita.php`)
+    const response = await fetch(`${API_BASE}/admin_get_balita`)
     return response.json()
   },
 
   adminSaveBalita: async (data) => {
-    const formData = new FormData()
-    Object.keys(data).forEach(key => {
-      if (data[key] !== null && data[key] !== undefined) {
-        if (key === 'penimbangan' && Array.isArray(data[key])) {
-          formData.append(key, JSON.stringify(data[key]))
-        } else {
-          formData.append(key, data[key])
-        }
-      }
-    })
-    
-    const response = await fetch(`${API_BASE}/admin_save_balita.php`, {
+    const response = await fetch(`${API_BASE}/admin_save_balita`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     })
     return response.json()
   },
 
   adminDeleteBalita: async (id) => {
-    const formData = new FormData()
-    formData.append('id', id)
-    
-    const response = await fetch(`${API_BASE}/admin_delete_balita.php`, {
+    const response = await fetch(`${API_BASE}/admin_delete_balita`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
     })
     return response.json()
   },
 
   adminGetOrangTua: async () => {
-    const response = await fetch(`${API_BASE}/admin_get_orang_tua.php`)
+    const response = await fetch(`${API_BASE}/admin_get_orang_tua`)
     return response.json()
   },
 
   createOrangTua: async (data) => {
-    const formData = new FormData()
-    Object.keys(data).forEach(key => {
-      if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key])
-      }
-    })
-    
-    const response = await fetch(`${API_BASE}/create_orang_tua.php`, {
+    const response = await fetch(`${API_BASE}/create_orang_tua`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     })
     return response.json()
   },
 
   deleteOrangTua: async (id) => {
-    const formData = new FormData()
-    formData.append('id', id)
-    
-    const response = await fetch(`${API_BASE}/delete_orang_tua.php`, {
+    const response = await fetch(`${API_BASE}/delete_orang_tua`, {
       method: 'POST',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
     })
     return response.json()
   },
 
   getBalitaByOrangTua: async () => {
-    const response = await fetch(`${API_BASE}/get_balita_by_orang_tua.php`)
+    // Get Firebase Auth token from current user
+    const { auth } = await import('../config/firebase');
+    if (!auth || !auth.currentUser) {
+      return { success: false, message: 'User not authenticated' };
+    }
+    
+    try {
+      const token = await auth.currentUser.getIdToken();
+      
+      const response = await fetch(`${API_BASE}/get_balita_by_orang_tua`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return response.json();
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return { success: false, message: 'Failed to get authentication token' };
+    }
+  },
+
+  getPemeriksaanByBalita: async (balitaId) => {
+    const response = await fetch(`${API_BASE}/get_pemeriksaan_by_balita?balita_id=${balitaId}`)
     return response.json()
   }
 }

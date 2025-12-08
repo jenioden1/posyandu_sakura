@@ -13,14 +13,14 @@ import { getFunctions } from 'firebase/functions';
 
 // Firebase Configuration
 // Konfigurasi dari Firebase Console
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDR54GnJuOytCyoCE_a7zytohlza7I4G5Y",
-  authDomain: "posyandu-sakura-4f664-42534.firebaseapp.com",
-  projectId: "posyandu-sakura-4f664-42534",
-  storageBucket: "posyandu-sakura-4f664-42534.firebasestorage.app",
-  messagingSenderId: "208535455796",
-  appId: "1:208535455796:web:415971bea7b6a4e115a261",
-  measurementId: "G-7KV8MW3B1L"
+  apiKey: "AIzaSyDiafkrOuGaP6QZLn7AswDaBFLl4eRDoP0",
+  authDomain: "posyandu-sakura-4cf92.firebaseapp.com",
+  projectId: "posyandu-sakura-4cf92",
+  storageBucket: "posyandu-sakura-4cf92.firebasestorage.app",
+  messagingSenderId: "342126846178",
+  appId: "1:342126846178:web:9630468b02a02ec07bfebb"
 };
 
 // Initialize Firebase
