@@ -4,9 +4,9 @@ function Tentang() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Tentang Posyandu Sakura</h1>
-        <p className="text-lg text-gray-600">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Tentang Posyandu Sakura</h1>
+        <p className="text-base sm:text-lg text-gray-600 px-4">
           Informasi lengkap tentang Posyandu Sakura dan pelayanan kesehatan balita
         </p>
       </div>

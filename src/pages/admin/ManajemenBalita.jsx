@@ -106,9 +106,9 @@ function ManajemenBalita() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white border border-gray-200 rounded-xl p-2 mb-6 shadow-sm flex flex-wrap gap-2">
+      <div className="bg-white border border-gray-200 rounded-xl p-2 mb-6 shadow-sm flex flex-wrap gap-2 overflow-x-auto">
         <button
-          className={`px-4 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'daftar-balita' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-colors whitespace-nowrap ${activeTab === 'daftar-balita' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           onClick={() => {
             setActiveTab('daftar-balita');
             setEditingData(null);
@@ -117,7 +117,7 @@ function ManajemenBalita() {
           📋 Daftar Balita
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'tambah-balita' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-colors whitespace-nowrap ${activeTab === 'tambah-balita' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           onClick={() => {
             setActiveTab('tambah-balita');
             setEditingData(null);
@@ -126,13 +126,13 @@ function ManajemenBalita() {
           📝 {editingData ? 'Edit Balita' : 'Tambah Balita'}
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'pemeriksaan' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-colors whitespace-nowrap ${activeTab === 'pemeriksaan' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           onClick={() => setActiveTab('pemeriksaan')}
         >
           📊 Pemeriksaan
         </button>
         <button
-          className={`px-4 py-2 rounded-lg font-semibold transition-colors ${activeTab === 'riwayat' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-colors whitespace-nowrap ${activeTab === 'riwayat' ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
           onClick={() => setActiveTab('riwayat')}
         >
           📈 Riwayat

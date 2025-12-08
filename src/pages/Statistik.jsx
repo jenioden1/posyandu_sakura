@@ -209,31 +209,35 @@ function Statistik() {
           <div className="text-lg font-semibold text-gray-800 mb-4">
             Statistik Pemeriksaan per Bulan
           </div>
-          <div className="overflow-x-auto">
-            <table className="table w-full">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Bulan</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Pemeriksaan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {statsByMonth.length === 0 ? (
-                  <tr>
-                    <td colSpan={2} className="px-4 py-8 text-center text-gray-500">
-                      Belum ada data pemeriksaan
-                    </td>
-                  </tr>
-                ) : (
-                  statsByMonth.map((stat) => (
-                    <tr key={stat.code}>
-                      <td className="px-4 py-2 text-sm text-gray-800">{stat.label}</td>
-                      <td className="px-4 py-2 text-sm text-gray-800">{stat.total}</td>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden">
+                <table className="table w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Bulan</th>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Pemeriksaan</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {statsByMonth.length === 0 ? (
+                      <tr>
+                        <td colSpan={2} className="px-4 py-8 text-center text-gray-500">
+                          Belum ada data pemeriksaan
+                        </td>
+                      </tr>
+                    ) : (
+                      statsByMonth.map((stat) => (
+                        <tr key={stat.code} className="hover:bg-gray-50">
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800">{stat.label}</td>
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 font-medium">{stat.total}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -244,35 +248,42 @@ function Statistik() {
           <div className="text-lg font-semibold text-gray-800 mb-4">
             Top 10 Balita dengan Pemeriksaan Terbanyak
           </div>
-          <div className="overflow-x-auto">
-            <table className="table w-full">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Anak</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Orang Tua</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Pemeriksaan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {topBalita.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                      Belum ada data pemeriksaan
-                    </td>
-                  </tr>
-                ) : (
-                  topBalita.map((b, idx) => (
-                    <tr key={b.id || idx}>
-                      <td className="px-4 py-2 text-sm text-gray-800">{idx + 1}</td>
-                      <td className="px-4 py-2 text-sm text-gray-800">{b.nama_anak}</td>
-                      <td className="px-4 py-2 text-sm text-gray-800">{b.nama_ortu}</td>
-                      <td className="px-4 py-2 text-sm text-gray-800">{b.jumlah_pemeriksaan}</td>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden">
+                <table className="table w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Anak</th>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Orang Tua</th>
+                      <th className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Jumlah Pemeriksaan</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {topBalita.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                          Belum ada data pemeriksaan
+                        </td>
+                      </tr>
+                    ) : (
+                      topBalita.map((b, idx) => (
+                        <tr key={b.id || idx} className="hover:bg-gray-50">
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 font-medium">{idx + 1}</td>
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800">
+                            <div className="font-medium">{b.nama_anak}</div>
+                            <div className="text-xs text-gray-500 md:hidden mt-1">{b.nama_ortu}</div>
+                          </td>
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 hidden md:table-cell">{b.nama_ortu}</td>
+                          <td className="px-3 sm:px-4 py-2 text-sm text-gray-800 font-medium">{b.jumlah_pemeriksaan}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

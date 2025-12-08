@@ -40,34 +40,39 @@ function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="card max-w-md w-full">
+      <div className="card max-w-md w-full bg-white shadow-md border border-gray-200">
         <div className="text-center mb-6">
-          <div className="text-2xl font-bold text-gray-800 mb-2">Login Posyandu</div>
-          <div className="text-gray-600">Masuk sebagai Admin atau Orang Tua</div>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-2xl">
+              P
+            </div>
+            <div className="text-2xl font-bold text-gray-800">Login Posyandu</div>
+          </div>
+          <div className="text-gray-600 text-sm sm:text-base">Masuk sebagai Admin atau Orang Tua</div>
         </div>
 
         <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
           <button
             type="button"
             onClick={() => setUserType('admin')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all text-sm sm:text-base ${
               userType === 'admin'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600 shadow-sm font-semibold'
                 : 'text-gray-600 hover:text-gray-800'
             }`}
           >
-            Admin
+            👨‍💼 Admin
           </button>
           <button
             type="button"
             onClick={() => setUserType('orang_tua')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+            className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all text-sm sm:text-base ${
               userType === 'orang_tua'
-                ? 'bg-white text-blue-600 shadow-sm'
+                ? 'bg-white text-blue-600 shadow-sm font-semibold'
                 : 'text-gray-600 hover:text-gray-800'
             }`}
           >
-            Orang Tua
+            👨‍👩‍👧 Orang Tua
           </button>
         </div>
 

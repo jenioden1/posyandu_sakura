@@ -47,6 +47,29 @@
     animation: scaleIn 0.2s ease-out;
   }
 
+  /* Mobile Responsive Utilities */
+  @media (max-width: 640px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  /* Smooth Scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Better Focus States for Accessibility */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
   }
