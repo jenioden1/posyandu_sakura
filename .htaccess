@@ -1,0 +1,15 @@
+# React Router - Handle client-side routing
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /POSYANDU-SAKURA/
+  
+  # Don't rewrite files or directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Don't rewrite API calls
+  RewriteCond %{REQUEST_URI} !^/POSYANDU-SAKURA/api/
+  
+  # Rewrite everything else to index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
