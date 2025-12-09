@@ -61,9 +61,32 @@ function Statistik() {
     const total_balita = balitaList.length
     const total_pemeriksaan = pemeriksaanList.length
 
-    // Calculate status gizi distribution
-    // Menggunakan field yang konsisten: status_gizi, status_gizi_tb_u, status_gizi_bb_u, kategori_tb_u, kategori_bb_u
-    const normal = pemeriksaanList.filter(p => {
+    // Ambil pemeriksaan terbaru untuk setiap balita
+    const latestPemeriksaanByBalita = {}
+    pemeriksaanList.forEach(p => {
+      if (p.balita_id) {
+        const existing = latestPemeriksaanByBalita[p.balita_id]
+        if (!existing) {
+          latestPemeriksaanByBalita[p.balita_id] = p
+        } else {
+          // Bandingkan tanggal untuk ambil yang terbaru
+          const existingDate = existing.tgl_ukur 
+            ? (existing.tgl_ukur.toDate ? existing.tgl_ukur.toDate() : new Date(existing.tgl_ukur))
+            : (existing.created_at?.toDate ? existing.created_at.toDate() : new Date(0))
+          const currentDate = p.tgl_ukur 
+            ? (p.tgl_ukur.toDate ? p.tgl_ukur.toDate() : new Date(p.tgl_ukur))
+            : (p.created_at?.toDate ? p.created_at.toDate() : new Date(0))
+          
+          if (currentDate > existingDate) {
+            latestPemeriksaanByBalita[p.balita_id] = p
+          }
+        }
+      }
+    })
+
+    // Fungsi helper untuk cek status
+    const isNormal = (p) => {
+      if (!p) return false
       const status = (p.status_gizi || '').toLowerCase()
       const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
       const statusTBU = (p.status_gizi_tb_u || '').toLowerCase()
@@ -75,9 +98,10 @@ function Statistik() {
         statusBBU === 'normal' ||
         p.kategori_tb_u === 'NORMAL' || 
         p.kategori_bb_u === 'NORMAL'
-    }).length
+    }
 
-    const stunting = pemeriksaanList.filter(p => {
+    const isStunting = (p) => {
+      if (!p) return false
       const status = (p.status_gizi || '').toLowerCase()
       const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
       const statusTBU = (p.status_gizi_tb_u || '').toLowerCase()
@@ -89,9 +113,10 @@ function Statistik() {
         statusTBU.includes('pendek') ||
         p.kategori_tb_u === 'STUNTING' ||
         p.kategori_tb_u === 'SEVERE_STUNTING'
-    }).length
+    }
 
-    const wasting = pemeriksaanList.filter(p => {
+    const isWasting = (p) => {
+      if (!p) return false
       const status = (p.status_gizi || '').toLowerCase()
       const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
       const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
@@ -107,9 +132,10 @@ function Statistik() {
         p.kategori_bb_u === 'SEVERE_WASTING' ||
         p.kategori_bb_u === 'UNDERWEIGHT' ||
         p.kategori_bb_u === 'SEVERE_UNDERWEIGHT'
-    }).length
+    }
 
-    const overweight = pemeriksaanList.filter(p => {
+    const isOverweight = (p) => {
+      if (!p) return false
       const status = (p.status_gizi || '').toLowerCase()
       const statusCompute = (p.status_gizi_hasil_compute || '').toLowerCase()
       const statusBBU = (p.status_gizi_bb_u || '').toLowerCase()
@@ -122,7 +148,14 @@ function Statistik() {
         statusBBU.includes('obesitas') ||
         p.kategori_bb_u === 'OVERWEIGHT' ||
         p.kategori_bb_u === 'OBESE'
-    }).length
+    }
+
+    // Hitung statistik berdasarkan balita unik (pemeriksaan terbaru)
+    const latestPemeriksaanArray = Object.values(latestPemeriksaanByBalita)
+    const normal = latestPemeriksaanArray.filter(p => isNormal(p)).length
+    const stunting = latestPemeriksaanArray.filter(p => isStunting(p)).length
+    const wasting = latestPemeriksaanArray.filter(p => isWasting(p)).length
+    const overweight = latestPemeriksaanArray.filter(p => isOverweight(p)).length
 
     setStats({
       total_balita,
