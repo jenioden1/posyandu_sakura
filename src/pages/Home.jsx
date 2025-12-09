@@ -102,24 +102,51 @@ function Home() {
     return () => unsubscribe()
   }, [])
 
-  const stats = {
-    total_balita: balitaList.length,
-    total_pemeriksaan: pemeriksaanList.length,
-    normal: pemeriksaanList.filter(p => 
-      p.status_gizi === 'Normal' || 
+  // Hitung statistik berdasarkan balita unik (bukan pemeriksaan)
+  // Ambil pemeriksaan terbaru untuk setiap balita
+  const latestPemeriksaanByBalita = {}
+  pemeriksaanList.forEach(p => {
+    if (p.balita_id) {
+      const existing = latestPemeriksaanByBalita[p.balita_id]
+      if (!existing) {
+        latestPemeriksaanByBalita[p.balita_id] = p
+      } else {
+        // Bandingkan tanggal untuk ambil yang terbaru
+        const existingDate = existing.tgl_ukur 
+          ? (existing.tgl_ukur.toDate ? existing.tgl_ukur.toDate() : new Date(existing.tgl_ukur))
+          : (existing.created_at?.toDate ? existing.created_at.toDate() : new Date(0))
+        const currentDate = p.tgl_ukur 
+          ? (p.tgl_ukur.toDate ? p.tgl_ukur.toDate() : new Date(p.tgl_ukur))
+          : (p.created_at?.toDate ? p.created_at.toDate() : new Date(0))
+        
+        if (currentDate > existingDate) {
+          latestPemeriksaanByBalita[p.balita_id] = p
+        }
+      }
+    }
+  })
+
+  // Fungsi helper untuk cek status
+  const isNormal = (p) => {
+    if (!p) return false
+    return p.status_gizi === 'Normal' || 
       p.status_gizi_hasil_compute?.includes('Normal') ||
       p.kategori_tb_u === 'NORMAL' || 
       p.kategori_bb_u === 'NORMAL'
-    ).length,
-    stunting: pemeriksaanList.filter(p => 
-      p.status_gizi?.includes('Stunting') ||
+  }
+
+  const isStunting = (p) => {
+    if (!p) return false
+    return p.status_gizi?.includes('Stunting') ||
       p.status_gizi_hasil_compute?.includes('Stunting') ||
       p.status_gizi_hasil_compute?.includes('Pendek') ||
       p.kategori_tb_u === 'STUNTING' ||
       p.kategori_tb_u === 'SEVERE_STUNTING'
-    ).length,
-    wasting: pemeriksaanList.filter(p => 
-      p.status_gizi?.includes('Gizi Kurang') ||
+  }
+
+  const isWasting = (p) => {
+    if (!p) return false
+    return p.status_gizi?.includes('Gizi Kurang') ||
       p.status_gizi?.includes('Gizi Buruk') ||
       p.status_gizi_hasil_compute?.includes('Wasting') || 
       p.status_gizi_hasil_compute?.includes('Gizi Kurang') ||
@@ -128,7 +155,36 @@ function Home() {
       p.kategori_bb_u === 'SEVERE_WASTING' ||
       p.kategori_bb_u === 'UNDERWEIGHT' ||
       p.kategori_bb_u === 'SEVERE_UNDERWEIGHT'
-    ).length
+  }
+
+  const isOverweight = (p) => {
+    if (!p) return false
+    return p.status_gizi?.includes('Overweight') ||
+      p.status_gizi?.includes('Obesitas') ||
+      p.status_gizi_hasil_compute?.includes('Overweight') || 
+      p.status_gizi_hasil_compute?.includes('Obesitas') ||
+      p.kategori_bb_u === 'OVERWEIGHT' ||
+      p.kategori_bb_u === 'OBESE'
+  }
+
+  // Hitung statistik berdasarkan balita unik
+  const latestPemeriksaanArray = Object.values(latestPemeriksaanByBalita)
+  const normal = latestPemeriksaanArray.filter(p => isNormal(p)).length
+  const stunting = latestPemeriksaanArray.filter(p => isStunting(p)).length
+  const wasting = latestPemeriksaanArray.filter(p => isWasting(p)).length
+  const overweight = latestPemeriksaanArray.filter(p => isOverweight(p)).length
+  const perluPerhatian = latestPemeriksaanArray.filter(p => 
+    isStunting(p) || isWasting(p) || isOverweight(p)
+  ).length
+
+  const stats = {
+    total_balita: balitaList.length,
+    total_pemeriksaan: pemeriksaanList.length,
+    normal,
+    stunting,
+    wasting,
+    overweight,
+    perluPerhatian
   }
 
   // Format tanggal
@@ -216,7 +272,7 @@ function Home() {
         
         <div className="card bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg drop-shadow-md">
           <div className="text-sm opacity-95">Perlu Perhatian</div>
-          <div className="text-3xl font-bold leading-tight">{stats.stunting + stats.wasting}</div>
+          <div className="text-3xl font-bold leading-tight">{stats.perluPerhatian}</div>
         </div>
       </div>
 
