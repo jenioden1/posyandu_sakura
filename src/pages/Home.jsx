@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore'
+import { collection, onSnapshot, query, orderBy, limit, doc, getDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import { Link } from 'react-router-dom'
 import StatusBadge from '../components/common/StatusBadge'
@@ -9,7 +9,7 @@ function Home() {
   const [pemeriksaanList, setPemeriksaanList] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Realtime listener untuk data balita
+  // Realtime listener untuk data balita dengan data orang tua
   useEffect(() => {
     // Set timeout untuk loading (max 5 detik)
     const loadingTimeout = setTimeout(() => {
@@ -19,13 +19,41 @@ function Home() {
     // Query tanpa orderBy dulu (untuk menghindari error jika field tidak ada)
     const q = query(collection(db, 'balita'), limit(50))
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       clearTimeout(loadingTimeout) // Cancel timeout jika data sudah datang
       
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
+      const data = await Promise.all(
+        snapshot.docs.map(async (docSnapshot) => {
+          const balita = {
+            id: docSnapshot.id,
+            ...docSnapshot.data()
+          }
+          
+          // Ambil data orang tua jika ada orang_tua_uid
+          if (balita.orang_tua_uid) {
+            try {
+              const orangTuaDoc = await getDoc(doc(db, 'orang_tua', balita.orang_tua_uid))
+              if (orangTuaDoc.exists()) {
+                const orangTuaData = orangTuaDoc.data()
+                // Update nama_ayah dan nama_ibu dari collection orang_tua (prioritas)
+                balita.nama_ayah = orangTuaData.nama_ayah || balita.nama_ayah || null
+                balita.nama_ibu = orangTuaData.nama_ibu || balita.nama_ibu || null
+                // Update nama_ortu
+                if (balita.nama_ayah && balita.nama_ibu) {
+                  balita.nama_ortu = `${balita.nama_ayah} / ${balita.nama_ibu}`
+                } else {
+                  balita.nama_ortu = balita.nama_ortu || balita.nama_ayah || balita.nama_ibu || null
+                }
+              }
+            } catch (err) {
+              console.warn('Error fetching orang_tua for balita:', balita.id, err)
+            }
+          }
+          
+          return balita
+        })
+      )
+      
       // Sort manual di frontend
       data.sort((a, b) => {
         const namaA = (a.nama_anak || a.nama || '').toLowerCase()
@@ -226,14 +254,18 @@ function Home() {
                     <td>{balita.nik || '-'}</td>
                     <td>
                       <span className="text-lg">
-                        {balita.gender === 'L' || balita.jenis_kelamin === 'L' ? '👦' : '👧'}
+                        {balita.jenis_kelamin === 'L' ? '👦' : balita.jenis_kelamin === 'P' ? '👧' : '❓'}
                       </span>
                       <span className="ml-1">
-                        {balita.gender || balita.jenis_kelamin || '-'}
+                        {balita.jenis_kelamin || '-'}
                       </span>
                     </td>
                     <td>{formatDate(balita.tgl_lahir)}</td>
-                    <td>{balita.nama_ortu || balita.nama_ayah || '-'}</td>
+                    <td>
+                      {balita.nama_ortu || 
+                       (balita.nama_ayah && balita.nama_ibu ? `${balita.nama_ayah} / ${balita.nama_ibu}` : 
+                        balita.nama_ayah || balita.nama_ibu || '-')}
+                    </td>
                   </tr>
                 ))}
               </tbody>

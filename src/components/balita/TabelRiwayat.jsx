@@ -236,10 +236,10 @@ function TabelRiwayat() {
                       </td>
                       <td>
                         <span className="text-lg">
-                          {balita?.jenis_kelamin === 'L' ? '👦' : '👧'}
+                          {balita?.jenis_kelamin === 'L' ? '👦' : balita?.jenis_kelamin === 'P' ? '👧' : '❓'}
                         </span>
                         <span className="ml-1">
-                          {balita?.jenis_kelamin === 'L' ? 'L' : 'P'}
+                          {balita?.jenis_kelamin || '-'}
                         </span>
                       </td>
                       <td>{item.umur_bulan ? `${item.umur_bulan.toFixed(1)} bln` : (balita ? calculateAge(balita.tgl_lahir) : '-')}</td>
