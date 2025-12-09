@@ -10,6 +10,7 @@ import { collection, addDoc, doc, updateDoc, getDocs, query, orderBy } from 'fir
 import { db } from '../../config/firebase';
 import { api } from '../../utils/api';
 import { useToastContext } from '../../contexts/ToastContext';
+import DateInput from '../common/DateInput';
 
 function FormTambahBalita({ onSuccess, editingData = null }) {
   const [loading, setLoading] = useState(false);
@@ -336,14 +337,13 @@ function FormTambahBalita({ onSuccess, editingData = null }) {
             <label className="label">
               <span className="label-text font-semibold">Tanggal Lahir <span className="text-error">*</span></span>
             </label>
-            <input
-              type="date"
+            <DateInput
               name="tgl_lahir"
               value={formData.tgl_lahir}
               onChange={handleChange}
-              className="input input-bordered w-full"
               required
-              max={new Date().toISOString().split('T')[0]} // Max hari ini
+              max={new Date().toISOString().split('T')[0]}
+              placeholder="DD-MM-YYYY (contoh: 15-06-2023)"
             />
           </div>
 

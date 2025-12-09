@@ -3,6 +3,7 @@ import { api } from '../../utils/api'
 import { formatTanggal } from '../../utils/helpers'
 import { useToastContext } from '../../contexts/ToastContext'
 import * as XLSX from 'xlsx'
+import DateInput from '../../components/common/DateInput'
 
 function AdminLaporan() {
   const [loading, setLoading] = useState(true)
@@ -370,12 +371,12 @@ function AdminLaporan() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tanggal Mulai
               </label>
-              <input
-                type="date"
+              <DateInput
+                name="start"
                 value={filterDate.start}
                 onChange={(e) => setFilterDate({ ...filterDate, start: e.target.value })}
-                className="input input-bordered w-full"
                 max={filterDate.end || undefined}
+                placeholder="DD-MM-YYYY (contoh: 01-01-2024)"
               />
               {filterDate.start && (
                 <p className="text-xs text-gray-500 mt-1">
@@ -387,12 +388,12 @@ function AdminLaporan() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tanggal Akhir
               </label>
-              <input
-                type="date"
+              <DateInput
+                name="end"
                 value={filterDate.end}
                 onChange={(e) => setFilterDate({ ...filterDate, end: e.target.value })}
-                className="input input-bordered w-full"
                 min={filterDate.start || undefined}
+                placeholder="DD-MM-YYYY (contoh: 31-12-2024)"
               />
               {filterDate.end && (
                 <p className="text-xs text-gray-500 mt-1">

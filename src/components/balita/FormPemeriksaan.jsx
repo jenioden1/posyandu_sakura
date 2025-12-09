@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useToastContext } from '../../contexts/ToastContext';
+import DateInput from '../common/DateInput';
 
 function FormPemeriksaan({ onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -276,14 +277,13 @@ function FormPemeriksaan({ onSuccess }) {
             <label className="label">
               <span className="label-text font-semibold">Tanggal Pengukuran <span className="text-error">*</span></span>
             </label>
-            <input
-              type="date"
+            <DateInput
               name="tgl_ukur"
               value={formData.tgl_ukur}
               onChange={handleChange}
-              className="input input-bordered w-full"
               required
-              max={new Date().toISOString().split('T')[0]} // Max hari ini
+              max={new Date().toISOString().split('T')[0]}
+              placeholder="DD-MM-YYYY (contoh: 15-06-2024)"
             />
           </div>
 
