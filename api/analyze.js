@@ -17,10 +17,11 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 // --- Helpers ---
-function calculateUmurBulan(tglLahirStr) {
+function calculateUmurBulan(tglLahirStr, tglReferensi = null) {
   const lahir = new Date(tglLahirStr);
-  const now = new Date();
-  const days = (now - lahir) / (1000 * 60 * 60 * 24);
+  // Gunakan tgl_ukur sebagai tanggal referensi jika tersedia, jika tidak gunakan tanggal sekarang
+  const referensi = tglReferensi ? new Date(tglReferensi) : new Date();
+  const days = (referensi - lahir) / (1000 * 60 * 60 * 24);
   return Math.round((days / 30.4375) * 100) / 100; // ~30.44 hari/bulan
 }
 
@@ -225,7 +226,8 @@ export default async function handler(req, res) {
     }
 
     // Hitung umur dalam bulan (presisi untuk WHO)
-    const umur_bulan = calculateUmurBulan(tgl_lahir);
+    // Gunakan tgl_ukur sebagai tanggal referensi untuk perhitungan umur yang akurat
+    const umur_bulan = calculateUmurBulan(tgl_lahir, tgl_ukur);
     
     // Hitung status gizi menggunakan Standar WHO (Z-Score)
     const whoResult = computeStatusGiziWHO({
